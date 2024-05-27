@@ -163,10 +163,10 @@
 						<a href="{{product.get_url}}" class="title">{{product.name}}</a>
 						<div class="price-wrap mt-2">
 							{% if product.has_discount %}
-							<span class="price">${{product.low_price}}</span>
-							<del class="price-old">${{product.price}}</del>
+							<span class="price">${{product.low_price|floatformat:"2g"}}</span>
+							<del class="price-old">${{product.price|floatformat:"2g"}}</del>
 							{% else %}
-							<span class="price">${{product.price}}</span>
+							<span class="price">${{product.price|floatformat:"2g"}}</span>
 							{% endif %}
 						</div> <!-- price-wrap.// -->
 					</div>

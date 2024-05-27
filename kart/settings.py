@@ -143,3 +143,19 @@ MEDIA_ROOT = BASE_DIR /'media'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración para manejo de ERROR en django con boostrap (DANGER)
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}
+
+# Configurar SMTP email Server
+# Configurar la cuenta de gmail: https://www.youtube.com/watch?v=OJxShAGAvLM
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'any.develop7@gmail.com'
+EMAIL_HOST_PASSWORD = 'nyewlolkrhwjcfdl'
+EMAIL_USE_SSL = True
+
+#BTkf>55WTiU-X2Z

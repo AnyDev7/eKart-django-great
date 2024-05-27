@@ -40,11 +40,14 @@ class MyAccountManager(BaseUserManager):
     
 
 class Account(AbstractBaseUser):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField('Nombre(s)', max_length=50)
+    last_name = models.CharField('Apellidos', max_length=50)
     username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(max_length=100, unique=True)
+    email = models.EmailField('Email', max_length=100, unique=True)
     phone_number = models.CharField(max_length=50)
+    city = models.CharField('Ciudad', max_length=50, default="")
+    state = models.CharField('Estado', max_length=50, default="")
+    country = models.CharField('Pais', max_length=50, default="")
 
     # requeridos
     joined_at = models.DateTimeField(auto_now_add=True)

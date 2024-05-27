@@ -27,8 +27,11 @@ urlpatterns = [
     path('store/', include('store.urls') ),
     path('ecart/', include('ecart.urls')),
     path('', include('todo.urls')),
+    path('account/', include('account.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Manejo de erores 404 y 500 desde urls.py basada en funciones y vistas basadas en clases
+# https://youtu.be/cE66WnX8Euo?si=r4M8c_BoxsbjXLFi
 
 # Cambiar titulos del panel Admin
 admin.site.site_header = "AP Equipos Panel Admin | powered by ▲▼anyDev7"
