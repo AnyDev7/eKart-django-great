@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse  #agregado
 from django.shortcuts import get_object_or_404, redirect #agregado
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from .models import Task
 
@@ -44,15 +45,17 @@ def undone_task(request, task_id):
     })
     """   
 
-
+@login_required(login_url='login')
 def add_task(request):
+    
     if request.method == 'POST':
+        user = request.user
         name = request.POST['name']
         task = request.POST['task']
         deadline = request.POST['deadline']
         
         try:
-            if Task.objects.create(name=name, task=task, deadline=deadline):
+            if Task.objects.create(user=user, name=name, task=task, deadline=deadline):
                 #agregar mensaje de exito
                 success = f"Se ha creado con éxito la tarea: {name}"
                 messages.success(request=request, message=success)
@@ -81,19 +84,26 @@ def add_task(request):
     """
 
 
-  
+@login_required(login_url='login')  
 def edit_task(request, task_id):
     get_task = get_object_or_404(Task, id=task_id)
+    
     if request.method == 'POST':
-        name = request.POST['name']
-        task = request.POST['task']
-        deadline = request.POST['deadline']
-        
-        get_task.name = name
-        get_task.task = task
-        get_task.deadline = deadline
-        get_task.save()
-        
+        try:
+            user = request.user
+            name = request.POST['name']
+            task = request.POST['task']
+            deadline = request.POST['deadline']
+
+            get_task.user = user
+            get_task.name = name
+            get_task.task = task
+            get_task.deadline = deadline
+            get_task.save()
+            success = f"Se cambio con éxito la tarea: {name}"
+            messages.success(request=request, message=success)
+        except:
+            pass
         #update() solo sirve para cambiar el Modelo, if record_task.objects.update(name=name, task=task, deadline=deadline):
         
         #agregar mensaje de exito

@@ -18,30 +18,27 @@
     }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h4 class="pt-3 text-center">Mis pendientes App | AP Equipos Integrados</h4>
+
+<body style="background: #e0e0e0;">
+    <div class="container" style="background: #e0e0e0;">
+        <h4 class="pt-3 text-center">Mis pendientes | AP Equipos Integrados</h4>
         <h7 class="pt-1 text-left">powered by ▲▼anyDev7 </h7>
         <hr>
-        {% if messages %}
-        {% for message in messages %}
-            <p {% if message.tags %}class="alert alert-{{ message.tags }} text-center"{% endif %}>{{message}}</p>
-        {% endfor %}
-        {% endif %}
+        
         <div class="row">
-            <h5>Mi Día <span class="text-muted fs-6">{% now "jS F Y" %}</span> </h5> 
-            
+            <h5> Mi Día <span class="text-muted fs-6">{% now "jS F Y"%}</span> {% if user.id is not None %} | ¡Bienvenido! {{user.first_name}} {%endif%}</h5> 
+            {% include "mainapp/includes/alerts.html" %}
             <div class="col-md-7 col-lg-7" style="height: 350px; overflow: scroll;">
                 <!-- List of all the tasks for the day -->
                 {% for task in tasks  %}
                     {% if task.is_completed == False %}
-                    <div class="card m-1">
+                    <div class="card m-1" style="background: #f5f5f5;">
                         <div class="card-body">                            
                             {{task.name}} | {{task.deadline}}
                             <span style="position: relative; float: right;">
                                 <a href= "{% url "done-task" task.id %}" class="btn btn-success"><i class="fa fa-check"></i> Hecho!</a>
                                 <a href=" {% url "delete-task" task.id %} " class="btn btn-danger"><i class="fa fa-trash"></i></a>
-                                <a href="{% url "edit-task" task.id %}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                                <a href="{% url "edit-task" task.id %}" class="btn btn-primary"><i class="fa fa-pencil"></i> Cambiar</a>
                             </span>
                         </div>
                     </div>
@@ -53,11 +50,11 @@
                 <!-- List of all the tasks that have completed -->
                 {% for task in tasks %}
                     {% if task.is_completed %}
-                        <div class="card m-1">
+                        <div class="card m-1" style="background: #f5f5f5;">
                             <div class="card-body">
                                 {{task.name}} | {{task.updated_at}}
                                 <span style="position: relative; float: right;">
-                                    <a href= "{% url "undone-task" task.id %}" class="btn btn-primary"><i class="fa fa-times"></i> No hecho</a>
+                                    <a href= "{% url "undone-task" task.id %}" class="btn btn-warning"><i class="fa fa-times"></i> No hecho</a>
                                 </span>
                             </div>
                         </div>

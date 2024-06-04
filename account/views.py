@@ -5,6 +5,8 @@ from .forms import RegisterForm
 from .models import Account
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
+from ecart.models import Cart, CartItem
+from ecart.views import _cart_id
 
 # User verification
 from django.contrib.sites.shortcuts import get_current_site
@@ -13,6 +15,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+
+# * VERIFICAR ESTA LIBRERIA
+import requests
 
 # Create your views here.
 
@@ -113,9 +118,59 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id= _cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_items = CartItem.objects.filter(cart=cart)
+
+                    # getting the product variartions by cart id
+                    product_variations = []
+                    for item in cart_items:
+                        variations = item.variations.all()
+                        product_variations.append(list(variations))
+
+                    #Get the cart items from the user to access his product variations
+                    cart_items = CartItem.objects.filter(user=user) 
+                    exist_var_list = []
+                    id_cartitem_list = []
+                    for item in cart_items:
+                        existing_variations = item.variations.all()
+                        exist_var_list.append(list(existing_variations))
+                        id_cartitem_list.append(item.id)
+                    # Get common variations in 2 list: product_variations & exist_var_list
+                    for pr in product_variations:
+                        if pr in exist_var_list:
+                            index = exist_var_list.index(pr)
+                            item_id = id_cartitem_list[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_items = CartItem.objects.filter(cart=cart)
+                            for item in cart_items:
+                                item.user = user
+                                item.save()
+                    #auth.login(request, user) # Agregado por mi Sí funciona
+                    #messages.success(request, "Bienvenido a pagar tu orden, pero primero tus datos")
+                    #return redirect('checkout') # Agregado por mi Sí funciona
+            except:
+                pass
             auth.login(request, user)
             messages.success(request, "Bienvenido a tu cuenta")
-            return redirect('dashboard')
+            url = request.META.get('HTTP_REFERER')
+            #messages.success(request, url) # Quitar
+            try:
+                query = requests.utils.urlparse(url).query
+                # looking for => 'next=/cart/checkout/'
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    next_page = params['next']
+                    messages.success(request, "Para pagar tu orden, revisa tus datos")
+                    return redirect(next_page)
+            except:
+                return redirect('dashboard')
         else:
             messages.error(request, "Correo + contraseña no validos")
             return redirect('login')

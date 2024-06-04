@@ -3,10 +3,10 @@
 {% block content %}
 
 <!-- ========================= SECTION CONTENT ========================= -->
-<section class="section-conten padding-y" style="min-height:84vh">
+<section class="section-conten padding-y" style="min-height:84vh; background: #e0e0e0;">
 
 {% if request.GET.command == 'verification' %}
-  <div class="container mx-auto alert alert-info text-center" role="alert" style="max-width: 880px; margin-top:100px; background:lightgray;">
+  <div class="container mx-auto alert alert-info text-center" role="alert" style="max-width: 880px; margin-top:100px; background: #f5f5f5;">
     <p>Gracias por registrarte con nosotros, se ha creado tu usuario.</p>
     <p> Ahora revisa tu correo: [{{request.GET.email}}] para activar tu cuenta.</p>
     <br><br>
@@ -15,7 +15,7 @@
 {% else %}
 
     <!-- ============================ COMPONENT LOGIN   ================================= -->
-        <div class="card mx-auto" style="max-width: 380px; margin-top:100px; background:lightgray;">
+        <div class="card mx-auto" style="max-width: 380px; margin-top:100px; background: #f5f5f5">
           <div class="card-body">
           <h4 class="card-title mb-4">Ingresar</h4>
           {% include "mainapp/includes/alerts.html" %}

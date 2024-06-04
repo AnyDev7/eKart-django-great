@@ -158,4 +158,4 @@ EMAIL_HOST_USER = 'any.develop7@gmail.com'
 EMAIL_HOST_PASSWORD = 'nyewlolkrhwjcfdl'
 EMAIL_USE_SSL = True
 
-#BTkf>55WTiU-X2Z
+#password app de gmail ??? BTkf>55WTiU-X2Z
