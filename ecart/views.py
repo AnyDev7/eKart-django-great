@@ -26,59 +26,36 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
     current_user = request.user
     if current_user.is_authenticated:
         product_variations = []
-        #if request.POST: No se usa
+        
         if request.method == 'POST':
-            
-            mini_context =""
-            var_context = ""
-            post_context = ""
-            dataset = []
+            option = []
             first_key = get_first_key(request.POST)
             first_val = request.POST[first_key]  # No maneja error si la key no existe en el Dic
             for item in request.POST:  
                 key = item
                 if key is not first_key:  # Nos saltamos el primer elemento del DicSet
-                    value = request.POST.get(key)  # key = varcat  value = variation, falta data-* = stockvar.value
-
-                    #value = request.POST.get(key, "valor por default")  # Maneja error, default, si key no existe.
-                    value_stock = request.POST.get(key) # NO SE USA PARA FILTRAR, falta traer data-*
-
-                    mini_context += f"<p> minicontext POST:{item} | Llave CAT: {key} - valor VAR: {value} - opcion STOCK: {value_stock} </p>" # borrar
-                    dataset.append(item) # borrar
-
-                    # Iterar el POST
-                    #https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
-                    #https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
-                    # OPCIONES DE DICT POST 'al final' https://stackoverflow.com/questions/11336548/how-to-get-post-request-values-in-django
-                    for i in list(request.POST): # borrar
-                        post_context += f"<p> post_context i in POST:{request.POST[i]} </p>"
-
-
+                    # request.POST.get(key, "valor por default")  # Maneja error, devuelve default si key no existe.
+                    option = request.POST.get(key)  # key = varcat  value = variation, data-* = stockvar.value
+                    value = option.split("-")[0]
+                    value_stock = option.split("-")[1] # NO se usó stockvar.value = data-*stockvarvalue, faltó traer data-*                    
+                    
                 # verificar si la variación coincide con el contenido del modelo (tabla)
                 try:
-                    #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas                    
-                    variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value)) #falta value=data-*stockvarvalue
-                    #variations = StockVar.objects.get(product=product_id, variation = Variation.objects.get(variation__iexact=value))
+                    #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas
+                    if len(value_stock) > 0:
+                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                    else:
+                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value))
                     
-                    # Hasta aquí todo funciona bien, sólo falta filtrar por 'value' de STOCKVAR
-                    for var in variations: # ciclo para obtener al menos el primer valor, sin filtrar con data-*
-                        #if value == var.variation.variation:
-                        var_context += f"<p> VAR_CONTEXT Producto: {var.product} | Categoria: {key} {var.variation.varcat} | Variacion: {value} {var.variation.variation} ↑ valor: {var.value} </p>" # borrar
+                    for var in variations: 
                         product_variations.append(var)
-                        break                    
                 except:
                     pass
 
-            #OK return HttpResponse(var_context)
-            #OK return HttpResponse(post_context) # Para verificar si el POST trae 1 parametro 3 valores: CAT VARIATION VALUE
-            #OK return HttpResponse(mini_context)
-                
 
-      
+        cart_item_exists = CartItem.objects.filter(product = product, user=current_user).exists()
 
-        is_cart_item_exists = CartItem.objects.filter(product = product, user=current_user).exists()
-
-        if is_cart_item_exists:
+        if cart_item_exists:
             cart_items = CartItem.objects.filter(product=product, user=current_user) 
             exist_var_list = []
             id_cartitem_list = []
@@ -101,7 +78,7 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
                 item.save()
             else: # Si las variaciones no existen en el cart
                 # Create new CartItem item, agregar un nuevo registro a la tabla
-                item = CartItem.objects.create(user=current_user, product=product, quantity=1)
+                item = CartItem.objects.create(user=current_user, product=product, quantity=1)                
                 # Agregar variaciones. Se agregan todos los registros a la tabla, se hace manual.
                 item.variations.clear()
                 # igual a la iteración: item.variations.add(*product_variations)  # igual a la iteración, * agrega todas:
@@ -127,51 +104,28 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
         product_variations = []
         #if request.POST: No se usa
         if request.method == 'POST':
-            
-            mini_context =""
-            var_context = ""
-            post_context = ""
-            dataset = []
+            option = []
             first_key = get_first_key(request.POST)
             first_val = request.POST[first_key]  # No maneja error si la key no existe en el Dic
             for item in request.POST:  
                 key = item
                 if key is not first_key:  # Nos saltamos el primer elemento del DicSet
-                    value = request.POST.get(key)  # key = varcat  value = variation, falta data-* = stockvar.value
-
-                    #value = request.POST.get(key, "valor por default")  # Maneja error, default, si key no existe.
-                    value_stock = request.POST.get(key) # NO SE USA PARA FILTRAR, falta traer data-*
-
-                    mini_context += f"<p> minicontext POST:{item} | Llave CAT: {key} - valor VAR: {value} - opcion STOCK: {value_stock} </p>" # borrar
-                    dataset.append(item) # borrar
-
-                    # Iterar el POST
-                    #https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
-                    #https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
-                    # OPCIONES DE DICT POST 'al final' https://stackoverflow.com/questions/11336548/how-to-get-post-request-values-in-django
-                    for i in list(request.POST): # borrar
-                        post_context += f"<p> post_context i in POST:{request.POST[i]} </p>"
-
+                    option = request.POST.get(key)  # key = varcat  value = variation, data-* = stockvar.value
+                    value = option.split("-")[0]
+                    value_stock = option.split("-")[1] # NO se usó stockvar.value = data-*stockvarvalue, faltó traer data-*                    
 
                 # verificar si la variación coincide con el contenido del modelo (tabla)
                 try:
-                    #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas                    
-                    variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value)) #falta value=data-*stockvarvalue
-                    #variations = StockVar.objects.get(product=product_id, variation = Variation.objects.get(variation__iexact=value))
+                    #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas
+                    if len(value_stock) > 0:
+                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                    else:
+                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value))
                     
-                    # Hasta aquí todo funciona bien, sólo falta filtrar por 'value' de STOCKVAR
-                    for var in variations: # ciclo para obtener al menos el primer valor, sin filtrar con data-*
-                        #if value == var.variation.variation:
-                        var_context += f"<p> VAR_CONTEXT Producto: {var.product} | Categoria: {key} {var.variation.varcat} | Variacion: {value} {var.variation.variation} ↑ valor: {var.value} </p>" # borrar
+                    for var in variations: 
                         product_variations.append(var)
-                        break                    
                 except:
                     pass
-
-            #OK return HttpResponse(var_context)
-            #OK return HttpResponse(post_context) # Para verificar si el POST trae 1 parametro 3 valores: CAT VARIATION VALUE
-            #OK return HttpResponse(mini_context)
-                
 
         try:
             cart = Cart.objects.get(cart_id=_cart_id(request)) # Conseguir el Cart actual con la cart_id de la sesion actual        
@@ -181,9 +135,9 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
             )
             cart.save()
 
-        is_cart_item_exists = CartItem.objects.filter(product = product, cart=cart).exists()
+        cart_item_exists = CartItem.objects.filter(product = product, cart=cart).exists()
 
-        if is_cart_item_exists: 
+        if cart_item_exists: 
             cart_items = CartItem.objects.filter(product=product, cart=cart)
             
             # We need: conseguir como identificar el item que se va a modificar, si no existe: se crea
@@ -210,10 +164,11 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
                 else:
                     if item.quantity > 1:
                         item.quantity -= 1
+
                 item.save()
             else: # Si las variaciones no existen en el cart
                 # Create new CartItem item, agregar un nuevo registro a la tabla
-                item = CartItem.objects.create(product=product, cart=cart, quantity=1)
+                item = CartItem.objects.create(product=product, cart=cart, quantity=1)                
                 # Agregar variaciones. Se agregan todos los registros a la tabla, se hace manual.
                 item.variations.clear()                
                 # igual a la iteración: item.variations.add(*product_variations)  # igual a la iteración, * agrega todas:
@@ -221,7 +176,7 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
                     for variation in product_variations:
                         item.variations.add(variation) 
                     
-                    item.save()
+                item.save()
 
         else: # Si no existen los CartItem 
             cart_item = CartItem.objects.create(product=product, cart=cart, quantity=1)
@@ -234,7 +189,7 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
 
         return redirect('ecart')
 
-
+# teclas de aumentar y disminuir cantidad en el carrito
 def minus_add_to_prod(request, product_id, cart_item_id, flag=False):        
     try:
         product = get_object_or_404(Product, id=product_id)
@@ -292,14 +247,16 @@ def ecart(request, total=0, quantity=0, cart_items=None):
             #total += cart_item.product.price * cart_item.quantity
             # checar funcion/método def sub_total(request) en el modelo de CartItem
             # cart_item.sub_total -> una instancia, cart_item.sub_total() -> valor resultante, 
-            sub_total = cart_item.sub_total()   
+            sub_total = cart_item.sub_total()   # checa si tiene descuento el price
             total +=  sub_total
             quantity += cart_item.quantity
         
         # Revisar si aplica esto para vendedores nacionales
-        ship_cost = 99
+        ship_cost = 99   # Crear tabla para tax y para ship_cost (por zonas por estados calcular tarifa)
+        ship_total = total + ship_cost
         tax = (2 * total)/100
-        g_total = total + ship_cost + tax
+        
+        g_total = ship_total # debería ser si se cobran impuestos: g_total = ship_total + tax
     except Cart.DoesNotExist or CartItem.DoesNotExist:
         pass
     context = {
@@ -333,15 +290,20 @@ def checkout(request, total=0, quantity=0, cart_items=None):
             # el 'price' se obtiene con la recursividad de las clases en los modelos
             #total += cart_item.product.price * cart_item.quantity
             # checar funcion/método def sub_total(request) en el modelo de CartItem
-            # cart_item.sub_total -> una instancia, cart_item.sub_total() -> valor resultante, 
-            sub_total = cart_item.sub_total()   
+            # cart_item.sub_total = una instancia, cart_item.sub_total() -> valor resultante, 
+            cart_price = 0
+            sub_total = cart_item.sub_total()
             total +=  sub_total
             quantity += cart_item.quantity
+            cart_price = cart_item.cartitem_price()
+            cart_item.price = cart_price
+            cart_item.save()
         
         # Revisar si aplica esto para vendedores nacionales
         ship_cost = 99
+        ship_total = total + ship_cost
         tax = (2 * total)/100
-        g_total = total + ship_cost + tax
+        g_total = ship_total # debería ser si se cobran impuestos: g_total = ship_total + tax
     except Cart.DoesNotExist or CartItem.DoesNotExist:
         pass
     context = {

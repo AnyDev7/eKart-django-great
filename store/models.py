@@ -20,9 +20,9 @@ class VarCat(models.Model):
     
     
 class Variation(models.Model):
+    varcat = models.ForeignKey(VarCat, verbose_name='Catalogo variación', on_delete=models.PROTECT)
     variation = models.CharField('Variacion', max_length=50)
     slug = models.CharField(max_length=100)
-    varcat = models.ForeignKey(VarCat, verbose_name='Catalogo variación', on_delete=models.PROTECT)
     is_active = models.BooleanField('Activa', default=True)
     created_at = models.DateTimeField('Creada el', auto_now_add=True)
     
@@ -35,13 +35,13 @@ class Variation(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField('Nombre prod', max_length=200, unique=True)
+    name = models.CharField('Nombre prod', max_length=100, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
-    brand = models.CharField('Marca', max_length=200, blank=True)
-    description = models.TextField('Descripción', max_length=500, blank=True)
-    data_sheet = models.TextField('Ficha técnica', max_length=1500, blank=True)
+    brand = models.CharField('Marca', max_length=50, blank=True)
+    description = models.TextField('Descripción', max_length=300, blank=True)
+    data_sheet = models.TextField('Ficha técnica', max_length=1000, blank=True)
     price = models.FloatField('Precio', blank=True)
-    stock = models.IntegerField('Existencias', blank=True)
+    stock = models.IntegerField('Existencias totales', blank=True)
     stockvariations = models.ManyToManyField(Variation, through='StockVar', blank=True)
     tax = models.FloatField('Impuesto', blank=True,default=0.02)
     is_available = models.BooleanField('Disponible', default=True)
@@ -58,7 +58,7 @@ class Product(models.Model):
     image4 = models.ImageField(upload_to='photos/products', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    categories = models.ManyToManyField(SubCategory, blank=True)
+    categories = models.ManyToManyField(SubCategory, verbose_name='SubCategorias', blank=True)
     
 
     class Meta:
@@ -78,20 +78,19 @@ class Product(models.Model):
         # Sí funciona return reverse('product_detail', args=['pollo-engorda', self.slug])
         # No funciona return reverse('product_detail', args=[self.category.slug, self.slug])
     
-    """
+    
     def __str__(self):
-        return f"{self.name} | {self.price} | {self.stock} | {self.is_available} | {self.has_discount}"
-    """
-        
+        return f"{self.name}"
     
     #Termina PRODUCT
 
 
 class StockVar(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
-    variation = models.ForeignKey(Variation, on_delete=models.CASCADE, blank=True, null=True)
+    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE, blank=True, null=True)
+    variation = models.ForeignKey(Variation, verbose_name='Variacion', on_delete=models.CASCADE, blank=True, null=True)
     value = models.CharField('Valor de la variacion',max_length=50)
-    stock = models.IntegerField('existencia', blank=True)
+    stock = models.IntegerField('Existencia por variación', blank=True, null=True)
+    # No lleva diferente precio en variaciones: price = models.FloatField('Precio por variación', blank=True, default=None)
     
     class Meta:
         verbose_name = 'Existencia por variación'
@@ -105,3 +104,6 @@ class StockVar(models.Model):
     # Todo sobre Many-to-Many relationships
     # https://docs.djangoproject.com/en/5.0/topics/db/examples/many_to_many/  
         
+    # variation2 en lugar de value???
+    #variation_2 = models.ForeignKey(Variation, verbose_name='Variacion 2',  related_name='variation2', on_delete=models.CASCADE, blank=True, null=True, default=Null)
+    # https://stackoverflow.com/questions/543377/how-can-i-have-two-foreign-keys-to-the-same-model-in-django

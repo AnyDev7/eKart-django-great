@@ -13,14 +13,14 @@ class RegisterForm(forms.ModelForm):
     class Meta:
         model = Account
         # campos que serán REQUERIDOS = Obligatorios en el Form
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password', 'city', 'country']
+        fields = ['first_name', 'last_name', 'phone', 'email', 'password', 'city', 'country']
     
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
         self.fields['first_name'].widget.attrs['placeholder'] = 'ingresa tu nombre'
         self.fields['last_name'].widget.attrs['placeholder'] = 'ingresa tus apellidos'
         self.fields['email'].widget.attrs['placeholder'] = 'ingresa correo'
-        self.fields['phone_number'].widget.attrs['placeholder'] = 'ingresa tu número'
+        self.fields['phone'].widget.attrs['placeholder'] = 'ingresa tu telefono'
         self.fields['city'].widget.attrs['placeholder'] = 'ingresa tu ciudad'
         self.fields['country'].widget.attrs['placeholder'] = 'ingresa tu pais'
         self.fields['country'].widget.attrs['value'] = 'México'

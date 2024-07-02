@@ -20,7 +20,8 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, verbose_name="Producto", on_delete=models.CASCADE)
     variations = models.ManyToManyField(StockVar, verbose_name="Variaciones", blank=True)
     cart = models.ForeignKey(Cart, verbose_name="Cart", on_delete=models.CASCADE, null=True)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField('Cantidad')
+    price = models.FloatField('Precio', blank=True, default=0)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -32,6 +33,12 @@ class CartItem(models.Model):
             return self.product.price * self.quantity
         else:
             return self.product.low_price * self.quantity
+        
+    def cartitem_price(self):
+        if self.product.has_discount:
+            return self.product.low_price
+        else:
+            return self.product.price
 
     """
     def __unicode__(self):

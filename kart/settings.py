@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'store',
     'ecart',
     'todo',
+    'order',
 ]
 
 MIDDLEWARE = [
@@ -157,5 +158,6 @@ EMAIL_PORT = 465
 EMAIL_HOST_USER = 'any.develop7@gmail.com'
 EMAIL_HOST_PASSWORD = 'nyewlolkrhwjcfdl'
 EMAIL_USE_SSL = True
-
 #password app de gmail ??? BTkf>55WTiU-X2Z
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'

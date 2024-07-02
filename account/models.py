@@ -37,17 +37,40 @@ class MyAccountManager(BaseUserManager):
         user.is_superadmin = True
         user.save(using=self._db)
         return user
+
+
+class Address(models.Model):
+    phone = models.CharField(max_length=50)
+    address_line_1 = models.CharField("Direccion", max_length=50)
+    address_line_2 = models.CharField("...Direccion", max_length=50, blank=True)
+    country = models.CharField('Pais', max_length=50)
+    state = models.CharField('Estado', max_length=50)
+    city = models.CharField('Ciudad', max_length=50)
+    zipcode = models.CharField('CP', max_length=10, default="")
+    default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
+
+    class Meta:
+        verbose_name = 'Direccion'
+        verbose_name_plural = 'Direcciones'
+    
+    def __str__(self):
+        return f"{self.address_line_1} - {self.city}"
+
 
 class Account(AbstractBaseUser):
     first_name = models.CharField('Nombre(s)', max_length=50)
     last_name = models.CharField('Apellidos', max_length=50)
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField('Email', max_length=100, unique=True)
-    phone_number = models.CharField(max_length=50)
+    phone = models.CharField('Teléfono', max_length=50)
     city = models.CharField('Ciudad', max_length=50, default="")
     state = models.CharField('Estado', max_length=50, default="")
     country = models.CharField('Pais', max_length=50, default="")
+    addresses = models.ManyToManyField(Address, verbose_name='Direcciones', blank=True)
 
     # requeridos
     joined_at = models.DateTimeField(auto_now_add=True)

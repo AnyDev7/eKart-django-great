@@ -1,8 +1,18 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Account
+from .models import Address, Account
 
 # Register your models here.
+class AddressAdmin(admin.ModelAdmin):
+
+    list_display = ('phone', 'address_line_1', 'city', 'state', 'country', 'is_active', 'default')
+    ordering = ('-created_at',)
+    filter_horizontal = ()
+    list_filter = ()
+    fieldsets = ()
+
+admin.site.register(Address, AddressAdmin)
+
 class AccountAdmin(UserAdmin):
 
     list_display = ('email', 'username', 'is_active', 'first_name', 'last_name', 'last_login', 'joined_at')
@@ -15,3 +25,6 @@ class AccountAdmin(UserAdmin):
     fieldsets = ()
 
 admin.site.register(Account, AccountAdmin)
+
+
+

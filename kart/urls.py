@@ -28,6 +28,7 @@ urlpatterns = [
     path('ecart/', include('ecart.urls')),
     path('', include('todo.urls')),
     path('account/', include('account.urls')),
+    path('order/', include('order.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Manejo de erores 404 y 500 desde urls.py basada en funciones y vistas basadas en clases

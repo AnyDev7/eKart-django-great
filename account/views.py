@@ -28,13 +28,13 @@ def register(request):
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
             email = form.cleaned_data['email']
-            phone_number = form.cleaned_data['phone_number']
+            phone = form.cleaned_data['phone']
             city = form.cleaned_data['city']
             country = form.cleaned_data['country']
             password = form.cleaned_data['password']
             username = email.split("@")[0]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
-            user.phone_number = phone_number
+            user.phone = phone
             user.city = city
             # obtener el valor seleccionado del select: key & value con request.POST
             user.state = request.POST['inputState'] # hace referencia la 'key' al 'name' del select o input
