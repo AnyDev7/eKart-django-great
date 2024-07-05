@@ -1,6 +1,9 @@
 from django.db import models
+
 from category.models import Category, SubCategory
+from account.models import Account
 from django.urls import reverse
+from django.db.models import Avg
 
 
 # Create your models here.
@@ -33,6 +36,7 @@ class Variation(models.Model):
     def __str__(self):
         return self.variation
 
+#https://codigofacilito.com/articulos/mejora-consultas-django  APLICAR
 
 class Product(models.Model):
     name = models.CharField('Nombre prod', max_length=100, unique=True)
@@ -78,7 +82,20 @@ class Product(models.Model):
         # Sí funciona return reverse('product_detail', args=['pollo-engorda', self.slug])
         # No funciona return reverse('product_detail', args=[self.category.slug, self.slug])
     
+
+    def avgRating(self):
+        ratings = Rating.objects.filter(product=self, status=True).aggregate(average=Avg('rating')) # agrega el campo average
+        avg = 0
+        if ratings['average'] is not None:
+            avg = float(ratings['average'])
+        return avg
     
+    def countRating(self):
+        cnt = Rating.objects.filter(product=self, status=True).count()
+        return cnt
+    
+    #item_entrega = EntregaItem.objects.values('codigo').order_by('codigo').annotate(suma=Sum('cantidad')) #agrega el campo suma
+
     def __str__(self):
         return f"{self.name}"
     
@@ -99,6 +116,25 @@ class StockVar(models.Model):
     
     def __str__(self):
         return f"{self.id} {self.variation.varcat} + {self.variation.variation} - {self.value}"
+
+    
+class Rating(models.Model):
+    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, verbose_name='Usuario', on_delete=models.CASCADE)
+    subject = models.CharField(verbose_name='Título', max_length=100, blank=True)
+    review = models.CharField(verbose_name='Comentario', max_length=300, blank=True)
+    rating = models.FloatField()
+    ip = models.CharField(max_length=20, blank=True)
+    status = models.BooleanField(verbose_name='Estatus', default=True)
+    created_at = models.DateTimeField(verbose_name='Creada', auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name='Actualizada', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Evaluación'
+        verbose_name_plural = 'Evaluaciones'
+
+    def __str__(self):
+        return self.subject
 
     # *****  OJO  *****
     # Todo sobre Many-to-Many relationships

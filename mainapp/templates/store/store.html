@@ -37,7 +37,7 @@
 					<li><a href="{% url "store" %}">Todos los productos</a></li>
 					<hr>
 					{% for cat in cat_links %}
-						<li><span> <b> {{cat.name}} </b></span>
+						<li><span><a href="{{cat.get_url}}"><b>{{cat.name}}</b></a></span>
 							<ul>
 								
 									{% for subcat in subcat_links %} 
@@ -59,7 +59,7 @@
 		<header class="card-header">
 			<a href="#" data-toggle="collapse" data-target="#collapse_4" aria-expanded="true" class="">
 				<i class="icon-control fa fa-chevron-down"></i>
-				<h6 class="title">Sizes </h6>
+				<h6 class="title">Talla </h6>
 			</a>
 		</header>
 		<div class="filter-content collapse show" id="collapse_4" style="">
@@ -91,7 +91,7 @@
 		<header class="card-header">
 			<a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
 				<i class="icon-control fa fa-chevron-down"></i>
-				<h6 class="title">Price range </h6>
+				<h6 class="title">Rango de precio </h6>
 			</a>
 		</header>
 		<div class="filter-content collapse show" id="collapse_3" style="">
@@ -124,7 +124,7 @@
 					</select>
 				</div>
 				</div> <!-- form-row.// -->
-				<button class="btn btn-block btn-primary">Apply</button>
+				<button class="btn btn-block btn-primary">Buscar</button>
 			</div><!-- card-body.// -->
 		</div>
 	</article> <!-- filter-group .// -->

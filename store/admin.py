@@ -1,5 +1,5 @@
 from django.contrib import admin
-from store.models import Product, VarCat, Variation, StockVar
+from store.models import Product, VarCat, Variation, StockVar, Rating
 
 # Register your models here.
 
@@ -40,5 +40,10 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {
         'slug': ('name',)
     }
-    filter_horizontal = ['categories', ] # checar que hace
+    filter_horizontal = ['categories', ] # Filtra objetos en ManytoMany relationship
 admin.site.register(Product, ProductAdmin)
+
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'subject', 'rating', 'status', 'created_at')
+    list_filter = ('product', 'user', 'status')
+admin.site.register(Rating, RatingAdmin)

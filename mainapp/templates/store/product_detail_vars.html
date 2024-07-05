@@ -25,13 +25,22 @@
 					<header class="border-bottom mb-4 pb-3">
 						<div class="form-inline">
 							
-							<span class="mr-md-auto"> \{{cat}}\<a href="{{subcat.get_url}}">{{subcat.name}}</a>\{{prod.name}}</span>
+							<span class="mr-md-auto"> \<a href="{{cat.get_url}}">{{cat}}</a>\<a href="{{subcat.get_url}}">{{subcat.name}}</a>\{{prod.name}}</span>
  							
 						</div>
 					</header><!-- sect-heading -->
 
 					<h2 class="title">{{prod.name}}</h2>
-
+					<div class="rating-star">
+						<span>
+							<i class="fa fa-star{% if prod.avgRating < 0.5 %}-o{% elif prod.avgRating >= 0.5 and prod.avgRating < 1 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if prod.avgRating < 1.5 %}-o{% elif prod.avgRating >= 1.5 and prod.avgRating < 2 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if prod.avgRating < 2.5 %}-o{% elif prod.avgRating >= 2.5 and prod.avgRating < 3 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if prod.avgRating < 3.5 %}-o{% elif prod.avgRating >= 3.5 and prod.avgRating < 4 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if prod.avgRating < 4.5 %}-o{% elif prod.avgRating >= 4.5 and prod.avgRating < 5 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							{% if prod.countRating > 0 %}<span><b> {{prod.countRating}} reviews</b></span>{% endif %}
+						</span>
+					</div>
 					<div class="mb-3"> 
 						{% if prod.low_price %}
 						<var class="price h4">${{prod.low_price}}</var> 
@@ -85,7 +94,7 @@
 						{% endif %}
 					-->
 					<!-- Se cambio por esto: -->
-					<button type="submit" class="btn  btn-warning"> <span class="text">Agregar al carrito </span> <i class="fas fa-shopping-cart"></i>  </button>
+					<button type="submit" class="btn  btn-info"> <span class="text">Agregar al carrito </span> <i class="fas fa-shopping-cart"></i>  </button>
 					<button type="button" class="btn  btn-primary"> <span class="text">Comprar ahora </span> <i class="fas fa-regular fa-heart"></i>  </button>
 
 					{% else %}
@@ -124,28 +133,87 @@
 	<br>
 
 	<div class="row">
-				<div class="col-md-9">
-
+		<div class="col-md-9">
+		<form action=" {% url "rating" prod.id %} " method="POST">
+			{% csrf_token %}
+			<h5>Dejanos tu comentario</h5>
+			<div>
+				<!--Rating stars-->
+				<label for="rating">Califica este producto</label>
+				<br>
+				<div class="rate">
+					<input type="radio" name="rating" id="rating10" value="5" required><label for="rating10" title="5"></label>
+					<input type="radio" name="rating" id="rating9" value="4.5" required><label for="rating9" title="4.5" class="half"></label>
+					<input type="radio" name="rating" id="rating8" value="4" required><label for="rating8" title="4"></label>
+					<input type="radio" name="rating" id="rating7" value="3.5" required><label for="rating7" title="3.5" class="half"></label>
+					<input type="radio" name="rating" id="rating6" value="3" required><label for="rating6" title="3"></label>
+					<input type="radio" name="rating" id="rating5" value="2.5" required><label for="rating5" title="2.5" class="half"></label>
+					<input type="radio" name="rating" id="rating4" value="2" required><label for="rating4" title="2"></label>
+					<input type="radio" name="rating" id="rating3" value="1.5" required><label for="rating3" title="1.5" class="half"></label>
+					<input type="radio" name="rating" id="rating2" value="1" required><label for="rating2" title="1"></label>
+					<input type="radio" name="rating" id="rating1" value="0.5" required><label for="rating1" title="0.5" class="half"></label>
+				</div>
+				<br>
+				<span style="padding-bottom:10px;">Titulo de tu comentario</span>
+				<input type="text" class="form-control" name="subject" required>
+				<br>
+				<span style="padding-bottom:50px;">Comentario del producto</span>
+				<textarea name="review" id="review" rows="3" columns="4" class="form-control"></textarea>
+				<br>
+				{% if user.is_authenticated %}
+					{% if orderproduct %}
+						<button type="submit" class="btn  btn-success"> <span class="text">Envía tu comentario </span> <i class="fas fa-check"></i>  </button>				
+					{% else %}
+						<p>Compra el producto para enviar una calificación.</p>
+					{% endif %}
+				{% else %}
+					<p>Debes estar registrado para calificar los productos. <span> <a href=" {% url "login" %} ">Registrate ahora!</a> </span> </p>
+				{% endif %}
+			</div>
+			<br>
+			{% include "mainapp/includes/alerts.html" %}
+		</form>
+		<br>
 		<header class="section-heading">
 			<h3>Comentarios de clientes </h3>  
-			
+			<div class="rating-star">
+				<span> 
+					<i class="fa fa-star{% if prod.avgRating < 0.5 %}-o{% elif prod.avgRating >= 0.5 and prod.avgRating < 1 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+					<i class="fa fa-star{% if prod.avgRating < 1.5 %}-o{% elif prod.avgRating >= 1.5 and prod.avgRating < 2 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+					<i class="fa fa-star{% if prod.avgRating < 2.5 %}-o{% elif prod.avgRating >= 2.5 and prod.avgRating < 3 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+					<i class="fa fa-star{% if prod.avgRating < 3.5 %}-o{% elif prod.avgRating >= 3.5 and prod.avgRating < 4 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+					<i class="fa fa-star{% if prod.avgRating < 4.5 %}-o{% elif prod.avgRating >= 4.5 and prod.avgRating < 5 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+					<span><b> {{prod.countRating}} reviews</b></span> {% if prod.countRating < 1 %} <span> | Sé el primero en calificar el producto</span>{% endif %}
+				</span> 
+			</div>
 		</header>
-
+		{% for rate in ratings %}
 		<article class="box mb-3">
 			<div class="icontext w-100">
+				{% comment "<img src=" {% static "./images/avatars/avatar1.jpg" %} " class="img-xs icon rounded-circle">" %}{% endcomment %}				
 				<img src=" {% static "./images/avatars/avatar1.jpg" %} " class="img-xs icon rounded-circle">
 				<div class="text">
-					<span class="date text-muted float-md-right">24.04.2024 </span>  
-					<h6 class="mb-1">Juan Pérez </h6>
-					
+					<span class="date text-muted float-md-right">{{rate.updated_at}}</span>  
+					<h6 class="mb-1">{{rate.user.full_name}}</h6>
+					<div class="rating-star">
+						<span>
+							<i class="fa fa-star{% if rate.rating == 0.5 %}-half-alt{% elif rate.rating < 1 %}-o{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if rate.rating == 1.5 %}-half-alt{% elif rate.rating < 2 %}-o{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if rate.rating == 2.5 %}-half-alt{% elif rate.rating < 3 %}-o{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if rate.rating == 3.5 %}-half-alt{% elif rate.rating < 4 %}-o{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if rate.rating == 4.5 %}-half-alt{% elif rate.rating < 5 %}-o{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+						</span>
+					</div>
 				</div>
 			</div> <!-- icontext.// -->
 			<div class="mt-3">
+				<h6>"{{rate.subject}}"</h6>
 				<p>
-					Es un buen producto, el envío me llego en el tiempo acordado, soluciono mi necesidad. Aunque con un precio un poco alto por su calidad.
+					{{rate.review}}
 				</p>	
 			</div>
 		</article>
+		{% endfor %}
 		</div> <!-- col.// -->
 	</div> <!-- row.// -->
 

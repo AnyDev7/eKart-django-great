@@ -13,14 +13,13 @@ class Category(models.Model):
         verbose_name = 'categoria'
         verbose_name_plural = 'categorias'
 
-    #def get_url(self):
-    #    return reverse('prod_by_cat', args=[self.slug])
+    def get_url(self):
+        return reverse('prod_by_cat', args=[None,self.slug,"c"])
     
     def __str__(self):
         return self.name
     
     
-    #models.SlugField(_(""))
 
 class SubCategory(models.Model):
     name = models.CharField("Nombre", max_length=50, unique=True)
@@ -34,7 +33,7 @@ class SubCategory(models.Model):
         verbose_name_plural = 'subcategorias'
 
     def get_url(self):
-        return reverse('prod_by_cat', args=[self.slug]) # Solo funciona para el filtrado por subcategoria
+        return reverse('prod_by_cat', args=[self.slug,None,"s"]) # Solo funciona para el filtrado por subcategoria
 
     def __str__(self):
         return self.name

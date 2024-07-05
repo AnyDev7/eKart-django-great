@@ -1,13 +1,18 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
+from django.shortcuts import redirect, render, HttpResponse, get_object_or_404, HttpResponseRedirect
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.urls import reverse
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-from store.models import Product, VarCat, Variation, StockVar
+
+from store.models import Product, VarCat, Variation, StockVar, Rating
 from category.models import Category, SubCategory
 from ecart.models import Cart, CartItem
 from ecart.views import _cart_id
+from .forms import formRating
+from order.models import OrderProduct
 
 # Create your views here.
 """
@@ -34,19 +39,26 @@ def paging(request, products, number_pages):
     paged_products = paginator.get_page(page)
     return paged_products
 
-def store(request, category_slug=None):
+def store(request, category_slug=None, cat_slug=None, flag=None):
     paged_products = None
     products = None
     low_prods = None
 
     if category_slug != None:
-        category = get_object_or_404(SubCategory, slug=category_slug)
-        products = Product.objects.filter(categories=category, is_available=True).order_by('-has_discount', '-created_at')
-        prod_count = products.count()
+        if flag == 's':
+            category = get_object_or_404(SubCategory, slug=category_slug)
+            products = Product.objects.filter(categories=category, is_available=True).order_by('-has_discount', '-created_at')    
+            low_prods = Product.objects.filter(categories=category, is_available=True, has_discount=True)
+        else:
+            #category = get_object_or_404(SubCategory, category__slug=cat_slug) # Sí funciona, devuelve 2 instancias o más
+            category = get_object_or_404(Category, slug=cat_slug) # Sí funciona
+            #subcategory = get_object_or_404(SubCategory, category=category) # Devuelve 2 instancias
+            # Puede causar sobre tráfico en la consulta
+            products = Product.objects.filter(categories__category=category, is_available=True).order_by('-has_discount', '-created_at').distinct() # Quitar los productos repetidos #Sí funciona
+            low_prods = Product.objects.filter(categories__category=category, is_available=True, has_discount=True).distinct() # Quitar los productos repetidos
 
-        low_prods = Product.objects.filter(categories=category, is_available=True, has_discount=True)
+        prod_count = products.count()
         low_prod_count = low_prods.count()
-        
         #paged_products = paging(request, products, 1)
 
     else:
@@ -57,7 +69,7 @@ def store(request, category_slug=None):
         low_prod_count = low_prods.count()
 
     if products:    
-        paged_products = paging(request, products, 3)
+        paged_products = paging(request, products, 3) # Modificar la cantidad de productos por página
     
     context = {
         'title': 'Store',
@@ -92,12 +104,32 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
     
+    # El usuario ya compro el producto?
+    if request.user.is_authenticated:
+        try:
+                orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
+        except OrderProduct.DoesNotExist:
+            orderproduct = False
+    else:
+        orderproduct = False    
+
+    # Las calificaciones de este producto
+    try: 
+        ratings = Rating.objects.filter(product_id=single_product.id, status=True)
+        rate = ratings.first()
+        average = rate.average()
+
+    except:
+        None
+
     context = {
             'prod': single_product,
             'cat': subcat.category,
             'subcat': subcat,
             'in_cart': in_cart,
             'varsall': varsall,
+            'orderproduct': orderproduct,
+            'ratings': ratings,
     }
     #return render(request, "store/product_detail_1.html", context)  # Sin variaciones
     return render(request, "store/product_detail_vars.html", context) # OK
@@ -139,5 +171,32 @@ def search(request):
         }
         
         return render(request, 'store/store.html', context)
-
-     
+    
+#@login_required(login_url='login')
+def rating(request, product_id):
+    url = request.META.get('HTTP_REFERER')  # url: Guarda la url anterior
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            try:
+                rate = Rating.objects.get(user__id=request.user.id, product__id=product_id)
+                form = formRating(request.POST, instance=rate)  # instance: rellena con los datos que ya existen.
+                form.save()
+                messages.success(request, 'Gracias, tu calificación se actualizó')
+                return redirect(url)
+            except Rating.DoesNotExist:
+                form = formRating(request.POST)
+                if form.is_valid():
+                    data = Rating()
+                    data.user_id = request.user.id
+                    data.product_id = product_id  # se usa: data.product_id, porque es un dato de otro Modelo (foreignkey)
+                    data.rating = form.cleaned_data['rating']
+                    data.subject = form.cleaned_data['subject']
+                    data.review = form.cleaned_data['review']
+                    data.ip = request.META.get('REMOTE_ADDR')                
+                    data.save()
+                    messages.success(request, 'Gracias, se envió tu calificación y comentario!')
+                    return redirect(url)
+    else:
+        messages.error(request, 'Debes estar registrado para calificar productos!')
+        return redirect('login')
+    return redirect(url)
