@@ -1,6 +1,6 @@
 from django.contrib import admin
-from store.models import Product, VarCat, Variation, StockVar, Rating
-
+from store.models import Product, VarCat, Variation, StockVar, Rating, ProductGallery
+import admin_thumbnails
 # Register your models here.
 
 
@@ -30,10 +30,13 @@ class StockVarInLine(admin.TabularInline):
 
 # NO SE DEBE REGISTRAR StockVar que es la tabla ManyToMany    
 #admin.site.register(StockVar, StockVarInLine)
-
+@admin_thumbnails.thumbnail('image')
+class ProductGalleryInline(admin.TabularInline):
+    model = ProductGallery
+    extra = 1
 
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [StockVarInLine,]
+    inlines = [StockVarInLine,ProductGalleryInline]
     list_display = ('name', 'stock', 'is_available', 'price', 'has_discount', 'low_price')
     list_editable = ('stock', 'is_available', 'price', 'has_discount', 'low_price')
     list_filter = ('is_available', 'has_discount', 'brand')
@@ -47,3 +50,5 @@ class RatingAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'subject', 'rating', 'status', 'created_at')
     list_filter = ('product', 'user', 'status')
 admin.site.register(Rating, RatingAdmin)
+
+admin.site.register(ProductGallery)

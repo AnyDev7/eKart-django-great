@@ -11,6 +11,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config  #https://pypi.org/project/python-decouple/
+
+# Borrar si no sirve
+#import django.utils.translation as original_translation
+#from django.utils.translation import gettext_lazy
+#original_translation.ugettext_lazy = gettext_lazy
+# Borrar hasta aqui.
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1!tqk58*wt$nanzf&)!(*va#ty56(_winxff0$!g*lee!i!*ve'
+SECRET_KEY = config('SECRET_KEY')  # Se cambio el texto explícito, por el dic de 'decouple' en '.env'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)  # Se cambio el texto explícito, por el dic de 'decouple' en '.env'
 
 ALLOWED_HOSTS = []
 
@@ -44,6 +51,7 @@ INSTALLED_APPS = [
     'ecart',
     'todo',
     'order',
+    'admin_honeypot',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +62,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #https://pypi.org/project/django-session-timeout/
+    'django_session_timeout.middleware.SessionTimeoutMiddleware',
 ]
+
+# session-timeout config
+#SESSION_EXPIRE_SECONDS = 10  # 3600 = 1hr en segundos
+#SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+#SESSION_TIMEOUT_REDIRECT = 'account/login'  # no funciona, redirige a 'accounts/login
 
 ROOT_URLCONF = 'kart.urls'
 
@@ -153,11 +168,13 @@ MESSAGE_TAGS = {
 
 # Configurar SMTP email Server
 # Configurar la cuenta de gmail: https://www.youtube.com/watch?v=OJxShAGAvLM
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'any.develop7@gmail.com'
-EMAIL_HOST_PASSWORD = 'nyewlolkrhwjcfdl'
-EMAIL_USE_SSL = True
-#password app de gmail ??? BTkf>55WTiU-X2Z
+
+# Se cambio el texto explícito, por el dic de 'decouple' en '.env'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
+
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'

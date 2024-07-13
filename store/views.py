@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 
-from store.models import Product, VarCat, Variation, StockVar, Rating
+from store.models import Product, VarCat, Variation, StockVar, Rating, ProductGallery
 from category.models import Category, SubCategory
 from ecart.models import Cart, CartItem
 from ecart.views import _cart_id
@@ -116,9 +116,15 @@ def product_detail(request, category_slug, product_slug):
     # Las calificaciones de este producto
     try: 
         ratings = Rating.objects.filter(product_id=single_product.id, status=True)
-        rate = ratings.first()
-        average = rate.average()
+        # Quitar rate = ratings.first()
+        # Quitar average = rate.average()
 
+    except:
+        None
+
+    # Galeria del producto
+    try: 
+        product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
     except:
         None
 
@@ -130,6 +136,7 @@ def product_detail(request, category_slug, product_slug):
             'varsall': varsall,
             'orderproduct': orderproduct,
             'ratings': ratings,
+            'product_gallery': product_gallery,
     }
     #return render(request, "store/product_detail_1.html", context)  # Sin variaciones
     return render(request, "store/product_detail_vars.html", context) # OK

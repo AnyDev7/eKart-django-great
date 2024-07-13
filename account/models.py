@@ -40,25 +40,38 @@ class MyAccountManager(BaseUserManager):
 
 
 class Address(models.Model):
-    phone = models.CharField(max_length=50)
     address_line_1 = models.CharField("Direccion", max_length=50)
     address_line_2 = models.CharField("...Direccion", max_length=50, blank=True)
-    country = models.CharField('Pais', max_length=50)
-    state = models.CharField('Estado', max_length=50)
     city = models.CharField('Ciudad', max_length=50)
+    state = models.CharField('Estado', max_length=50)
+    country = models.CharField('Pais', max_length=50)
     zipcode = models.CharField('CP', max_length=10, default="")
-    default = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    phone = models.CharField('Telefono',max_length=50)
+    default = models.BooleanField('Predefinida', default=False)
+    is_active = models.BooleanField('Acitva', default=True)
+    created_at = models.DateTimeField('Creada el', auto_now_add=True)
+    updated_at = models.DateTimeField('Actualizada el', auto_now=True)
     
 
     class Meta:
         verbose_name = 'Direccion'
         verbose_name_plural = 'Direcciones'
     
+    def full_address(self):
+        return f"{self.address_line_1} {self.address_line_2}" 
+    
     def __str__(self):
         return f"{self.address_line_1} - {self.city}"
+
+# Borrar, es para Mesas de FoodTruck App
+# https://stackoverflow.com/questions/11278074/how-do-i-display-django-model-choice-list-in-a-template
+# https://docs.djangoproject.com/en/5.0/ref/forms/widgets/
+# https://stackoverflow.com/questions/15393134/django-how-can-i-create-a-multiple-select-form
+
+STATESMX = ( # Por checar o borrar / Debe ser una tupla para el parámetro 'choices'
+    ('Puebla', 'Puebla'),
+    ('CDMX', 'CDMX'),
+)
 
 
 class Account(AbstractBaseUser):
@@ -92,6 +105,9 @@ class Account(AbstractBaseUser):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
     
+    def basic_address(self):
+        return f"{self.city} {self.state}"   
+    
     def __str__(self):
         return f"{self.username} - {self.email}"
     
@@ -103,3 +119,15 @@ class Account(AbstractBaseUser):
 
     #models.PhoneNumberField(_(""))
     #models.EmailField(_(""), max_length=254)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(Account, verbose_name="Usuario", on_delete=models.CASCADE)
+    # use 'addresses' field of 'user' instead of line_address_, etc
+    picture = models.ImageField("Foto de Perfil", blank=True, upload_to='user_profile') # dentro del directorio de media en raíz del proyecto
+
+    class Meta:
+        verbose_name = 'perfil de usuario'
+        verbose_name_plural = 'perfiles de usuario'
+
+    def __str__(self):
+        return self.user.first_name

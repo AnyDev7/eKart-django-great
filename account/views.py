@@ -1,8 +1,8 @@
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 
 
-from .forms import RegisterForm
-from .models import Account
+from .forms import RegisterForm, UserForm, UserProfileForm
+from .models import Account, UserProfile
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from ecart.models import Cart, CartItem
@@ -15,6 +15,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+
+from order.models import Order, OrderProduct
 
 # * VERIFICAR ESTA LIBRERIA
 import requests
@@ -46,6 +48,11 @@ def register(request):
                 return HttpResponse("El usuario existe, pero NO esta inactivo")
             """
             user.save()
+            # Create User Profile
+            profile = UserProfile()
+            profile.user_id = user.id
+            profile.picture = 'default/no_gender_user_profile_picture.png'
+            profile.save()
 
             # User activation
             current_site = get_current_site(request)
@@ -115,7 +122,8 @@ def login(request):
         email = request.POST['email']
         password = request.POST['password']
 
-        user = auth.authenticate(email=email, password=password)
+        # Auntenticar el usuario capturado en el form
+        user = auth.authenticate(email=email, password=password) 
 
         if user is not None:
             try:
@@ -163,7 +171,7 @@ def login(request):
             #messages.success(request, url) # Quitar
             try:
                 query = requests.utils.urlparse(url).query
-                # looking for => 'next=/cart/checkout/'
+                # looking for ej => 'next=/cart/checkout/'
                 params = dict(x.split('=') for x in query.split('&'))
                 if 'next' in params:
                     next_page = params['next']
@@ -202,7 +210,17 @@ def activate(request, uidb64, token):
 
 @login_required(login_url = 'login')
 def dashboard(request):
-    return render(request, 'account/dashboard.html')
+    try:
+        orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+        orders_count = orders.count()
+        userprofile = get_object_or_404(UserProfile, user_id=request.user.id)
+        context = {
+            'orders_count': orders_count,
+            'userprofile': userprofile,
+        }
+    except:
+        None
+    return render(request, 'account/dashboard.html', context)
 
 
 def forgot_password(request):
@@ -266,3 +284,75 @@ def reset_password(request):
             messages.error(request, "Las contraseñas deben ser iguales")
         
     return render(request, 'account/reset_password.html')
+
+
+@login_required(login_url='login')
+def edit_profile(request):
+    userprofile = get_object_or_404(UserProfile, user_id=request.user.id)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user) # 'instance' es para editar la instancia que ya existe
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Tu datos de perfil se actualizaron.')
+            return redirect('edit_profile')
+    else:
+        user_form = UserForm(instance=request.user) # 'instance' es para editar la instancia que ya existe
+        profile_form = UserProfileForm(instance=userprofile)
+        context = {
+            'user_form': user_form,
+            'profile_form': profile_form,
+            'userprofile': userprofile,
+        }
+        return render(request, 'account/edit_profile.html', context)
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        user = get_object_or_404(Account, username__exact=request.user.username )
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Se cambio con éxito su contraseña.')
+                auth.logout(request)
+                return redirect('login')
+            else:
+                messages.error(request, 'Contraseña actual incorrecta.')
+        else:
+                messages.error(request, 'Nueva constraseña no coincide.')
+        return redirect('change_password')
+    
+    return render(request, "account/change_password.html")
+
+
+@login_required(login_url='login')
+def my_orders(request):
+    try:
+        orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+        # Unir o sumar queryset's : https://stackoverflow.com/questions/29587382/how-to-add-an-model-instance-to-a-django-queryset
+        orderproducts = OrderProduct.objects.filter(user__id=request.user.id, ordered=True)
+        context = {
+            'orders': orders,
+            'orderproducts': orderproducts,
+        }
+    except:
+        None
+    return render(request, "account/my_orders.html", context)
+
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    ordered_products = OrderProduct.objects.filter(order__id=order_id) # order__id: doble 'underscore' para accesar al campo de foreignkey
+    context = {
+        'order': order,
+        'ordered_products': ordered_products,
+    }
+    return render(request, 'order/order_detail.html', context)

@@ -37,7 +37,25 @@
 				<a href="{{product.get_url}}" class="img-wrap"> <img src=" {{product.image1.url}} "> </a>
 				<figcaption class="info-wrap">
 					<a href="{{product.get_url}}" class="title">{{product.name}}</a>
-					<div class="price mt-1">${{product.price}}</div> <!-- price-wrap.// -->
+					
+					<div>
+					{% if product.has_discount %}
+						<span class="price mt-1">${{product.low_price|floatformat:"2g"}}</span>
+						<del class="price-old">${{product.price|floatformat:"2g"}}</del>
+					{% else %}
+						<span class="price mt-1">${{product.price|floatformat:"2g"}}</span>
+					{% endif %}
+					</div> <!-- price-wrap.// -->
+					<div class="rating-star">
+						<span>
+							<i class="fa fa-star{% if product.avgRating < 0.5 %}-o{% elif product.avgRating >= 0.5 and product.avgRating < 1 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if product.avgRating < 1.5 %}-o{% elif product.avgRating >= 1.5 and product.avgRating < 2 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if product.avgRating < 2.5 %}-o{% elif product.avgRating >= 2.5 and product.avgRating < 3 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if product.avgRating < 3.5 %}-o{% elif product.avgRating >= 3.5 and product.avgRating < 4 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							<i class="fa fa-star{% if product.avgRating < 4.5 %}-o{% elif product.avgRating >= 4.5 and product.avgRating < 5 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+							
+						</span>
+					</div> <!--rating-star-->
 				</figcaption>
 			</div>
 		</div> <!-- col.// -->

@@ -136,6 +136,18 @@ class Rating(models.Model):
     def __str__(self):
         return self.subject
 
+class ProductGallery(models.Model):
+    product = models.ForeignKey(Product, verbose_name="Producto", default=None, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='store/product/', verbose_name="Fotos", max_length=255)
+
+    class Meta:
+        verbose_name = 'Galeria'
+        verbose_name_plural = 'Galeria de productos'
+
+    def __str__(self):
+        return self.product.name
+
+
     # *****  OJO  *****
     # Todo sobre Many-to-Many relationships
     # https://docs.djangoproject.com/en/5.0/topics/db/examples/many_to_many/  

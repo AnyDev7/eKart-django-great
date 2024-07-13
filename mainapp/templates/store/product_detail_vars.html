@@ -11,10 +11,20 @@
 		<div class="row no-gutters">
 			<aside class="col-md-6">
 				<article class="gallery-wrap"> 
-					<div class="img-big-wrap">
-						<a href="{{prod.image1.url}}"><img src="{{prod.image1.url}}"></a>
+					<div class="img-big-wrap mainImage">
+					<center><a href="{{prod.image1.url}}"><img src="{{prod.image1.url}}"></a></center>
 					</div> <!-- img-big-wrap.// -->
 				</article> <!-- gallery-wrap .end// -->
+				<ul class="thumb">
+					
+					<li>
+						<a href="{{prod.image1.url}}" target="mainImage"> <img src="{{prod.image1.url}}" alt="Articulo foto"> </a>
+						{% for item in product_gallery %}
+						<a href="{{item.image.url}}" target="mainImage"> <img src="{{item.image.url}}" alt="Articulo foto"> </a>
+						{% endfor %}
+					</li>
+					
+				</ul>
 			</aside>
 		<main class="col-md-6 border-left">
 			
@@ -40,13 +50,13 @@
 							<i class="fa fa-star{% if prod.avgRating < 4.5 %}-o{% elif prod.avgRating >= 4.5 and prod.avgRating < 5 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
 							{% if prod.countRating > 0 %}<span><b> {{prod.countRating}} reviews</b></span>{% endif %}
 						</span>
-					</div>
+					</div> <!--rating-star-->
 					<div class="mb-3"> 
 						{% if prod.low_price %}
-						<var class="price h4">${{prod.low_price}}</var> 
-						<del class="price-old h4">${{prod.price}}</del> 
+						<var class="price h4">${{prod.low_price|floatformat:"2g" }}</var> 
+						<del class="price-old h4">${{prod.price|floatformat:"2g" }}</del> 
 						{% else %}
-						<var class="price h4">${{prod.price}}</var> 
+						<var class="price h4">${{prod.price|floatformat:"2g" }}</var> 
 						{% endif %}
 					</div> 
 					<p>{{prod.description}}</p>

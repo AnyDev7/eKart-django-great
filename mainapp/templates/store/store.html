@@ -169,6 +169,16 @@
 							<span class="price">${{product.price|floatformat:"2g"}}</span>
 							{% endif %}
 						</div> <!-- price-wrap.// -->
+						<div class="rating-star">
+							<span>
+								<i class="fa fa-star{% if product.avgRating < 0.5 %}-o{% elif product.avgRating >= 0.5 and product.avgRating < 1 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+								<i class="fa fa-star{% if product.avgRating < 1.5 %}-o{% elif product.avgRating >= 1.5 and product.avgRating < 2 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+								<i class="fa fa-star{% if product.avgRating < 2.5 %}-o{% elif product.avgRating >= 2.5 and product.avgRating < 3 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+								<i class="fa fa-star{% if product.avgRating < 3.5 %}-o{% elif product.avgRating >= 3.5 and product.avgRating < 4 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+								<i class="fa fa-star{% if product.avgRating < 4.5 %}-o{% elif product.avgRating >= 4.5 and product.avgRating < 5 %}-half-alt{% endif %} " aria-hidden="true" style="color: #ffb503;"></i>
+								
+							</span>
+						</div> <!--rating-star-->
 					</div>
 					 {% comment " <a href="{% url "minus_add_prod" low_prod.id 1 %}" class="btn btn-block btn-primary"> <span class="text">Agregar </span> <i class="fas fa-shopping-cart"></i>  </a> " %}{% endcomment %}
 					 <a href="{{product.get_url }}" class="btn btn-block btn-primary"> <span class="text">Ver producto</span> <i class="fas fa-eye"></i>  </a>
