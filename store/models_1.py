@@ -21,7 +21,6 @@ variation_category_choices = (
 )
 
 class Variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variation_category = models.CharField(max_length=50, choices=variation_category_choices)
     variation_value = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
@@ -45,7 +44,7 @@ class Product(models.Model):
     data_sheet = models.TextField('Ficha técnica', max_length=1500, blank=True)
     price = models.FloatField('Precio', blank=True)
     stock = models.IntegerField('Existencias', blank=True)
-    variation = models.ManyToManyField(Variation, blank=True)
+    variations = models.ManyToManyField(Variation, blank=True)
     tax = models.FloatField('Impuesto', blank=True,default=0.02)
     is_available = models.BooleanField('Disponible', default=True)
 

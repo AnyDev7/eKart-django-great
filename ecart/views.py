@@ -1,7 +1,12 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from kart.settings import STATES_MX
 from store.models import Product, Variation, StockVar
 from ecart.models import Cart, CartItem
+from account.models import Address
+from account.forms import AddressForm
+#from account.views import addresses
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -29,19 +34,19 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
         
         if request.method == 'POST':
             option = []
-            first_key = get_first_key(request.POST)
+            first_key = get_first_key(request.POST) # Dic de POST: key= "name" value= "value o contenido"
             first_val = request.POST[first_key]  # No maneja error si la key no existe en el Dic
             for item in request.POST:  
                 key = item
                 if key is not first_key:  # Nos saltamos el primer elemento del DicSet
                     # request.POST.get(key, "valor por default")  # Maneja error, devuelve default si key no existe.
-                    option = request.POST.get(key)  # key = varcat  value = variation, data-* = stockvar.value
+                    option = request.POST.get(key)  # key = varcat  value = variation, value_stock(data-*) = stockvar.value
                     value = option.split("-")[0]
                     value_stock = option.split("-")[1] # NO se usó stockvar.value = data-*stockvarvalue, faltó traer data-*                    
                     
                 # verificar si la variación coincide con el contenido del modelo (tabla)
                 try:
-                    #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas
+                    # '__iexact' no importa si son mayusculas o minusculas
                     if len(value_stock) > 0:
                         variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
                     else:
@@ -269,13 +274,67 @@ def ecart(request, total=0, quantity=0, cart_items=None):
     }
     return render(request, 'store/ecart.html', context)
     
+@login_required(login_url='login')
+def select_address(request, total=""):
+    try:
+        address = Address.objects.filter(user__id=request.user.id,  default=True).first()
+    except Address.DoesNotExist:
+        address = False
+        messages.warning(request, 'No tienes una direccion favorita predeterminada.')
+
+    if address == None:
+        address = False
+        messages.warning(request, 'No tienes una direccion favorita predeterminada.')
         
 
+        """
+        try:
+            addresses = Address.objects.filter(user__id=request.user.id)
+        except:
+            addresses = Address()
+
+        if addresses.exists():
+            context = {
+                'addresses': addresses,
+            }
+        else:
+            address_form = AddressForm()
+            context = {
+                'addresses': addresses,
+                'address_form': address_form,
+                #'states_mx': STATES_MX,
+            }
+        return render(request, "account/address.html", context)
+        """
+            
+    context = {
+    'total': float(total),
+    'address': address,
+    }
+    
+    return render(request, 'store/select_address.html', context)
+    
+
 @login_required(login_url='login')
-def checkout(request, total=0, quantity=0, cart_items=None):
-    tax = 0
-    g_total = 0
-    ship_cost = 0
+def checkout(request, address_id=0, total=0, tax=0, ship_cost=0, g_total=0, quantity=0):
+    address_option = None
+    pickup_option = None
+    address = None
+    if request.method == 'POST':
+        # get from 'POST' address, pickup, order_note
+        shipment_option = request.POST.get("shipment")
+        order_note = request.POST.get("order_note")
+        if shipment_option == 'pickup':
+            pickup_option = True
+        else:
+            address_option = True
+        
+    if address_option == True:
+        try:
+            address = Address.objects.get(id=int(shipment_option))
+        except Address.DoesNotExist:
+            address = None
+    
     try:
         sub_total = 0
         sub_total = None
@@ -304,8 +363,13 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         ship_total = total + ship_cost
         tax = (2 * total)/100
         g_total = ship_total # debería ser si se cobran impuestos: g_total = ship_total + tax
+
     except Cart.DoesNotExist or CartItem.DoesNotExist:
+        cart_items = None
         pass
+        
+        
+        
     context = {
     'total': total,
     'tax': tax,
@@ -313,5 +377,13 @@ def checkout(request, total=0, quantity=0, cart_items=None):
     'g_total': g_total,
     'quantity': quantity,
     'cart_items': cart_items,
+    'address': address,
+    'shipment_option': shipment_option,
+    'address_option': address_option,
+    'pickup_option': pickup_option,
+    'order_note': order_note,
     }
+
+    # Enviar primero a selección de dirección: return render(request, 'store/select_address.html', context)
     return render(request, 'store/checkout.html', context)
+    

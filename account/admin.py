@@ -5,8 +5,7 @@ from django.utils.html import format_html
 
 # Register your models here.
 class AddressAdmin(admin.ModelAdmin):
-
-    list_display = ('phone', 'address_line_1', 'city', 'state', 'country', 'is_active', 'default')
+    list_display = ('user', 'address_line_1', 'phone', 'city', 'state', 'country', 'is_active', 'default')
     ordering = ('-created_at',)
     filter_horizontal = ()
     list_filter = ()

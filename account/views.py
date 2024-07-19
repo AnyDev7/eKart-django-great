@@ -1,8 +1,10 @@
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 
+from kart.settings import STATES_MX
 
-from .forms import RegisterForm, UserForm, UserProfileForm
-from .models import Account, UserProfile
+
+from .forms import RegisterForm, UserForm, UserProfileForm, AddressForm
+from .models import Address, Account, UserProfile
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from ecart.models import Cart, CartItem
@@ -21,9 +23,14 @@ from order.models import Order, OrderProduct
 # * VERIFICAR ESTA LIBRERIA
 import requests
 
-# Create your views here.
+# Variables de entorno
+#https://diegoamorin.com/variables-de-entorno-django/
+
+
+
 
 def register(request):
+    #global STATES_MX
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -76,43 +83,10 @@ def register(request):
     else:
         # Solo limpia la Form si es la primera vez que se accesa, si o muestra errores y contenido de form
         form = RegisterForm()  
-    states_mx = [
-        'Aguascalientes',
-        'Baja California',
-        'Baja California Sur',
-        'Campeche',
-        'Chiapas',
-        'Chihuahua',
-        'Ciudad de México',
-        'Coahuila de Zaragoza',
-        'Colima',
-        'Durango',
-        'Estado de México',
-        'Guanajuato',
-        'Guerrero',
-        'Hidalgo',
-        'Jalisco',
-        'Michoacán de Ocampo',
-        'Morelos',
-        'Nayarit',
-        'Nuevo León',
-        'Oaxaca',
-        'Puebla',
-        'Querétaro',
-        'Quintana Roo',
-        'San Luis Potosí',
-        'Sinaloa',
-        'Sonora',
-        'Tabasco',
-        'Tamaulipas',
-        'Tlaxcala',
-        'Veracruz de Ignacio de la Llave',
-        'Yucatán',
-        'Zacatecas'
-        ]
+    
     context = {
         'form': form,
-        'states_mx': states_mx,
+        'states_mx': STATES_MX,
     }
     return render(request, 'account/register.html', context)
 
@@ -211,12 +185,18 @@ def activate(request, uidb64, token):
 @login_required(login_url = 'login')
 def dashboard(request):
     try:
+        address = Address.objects.get(user_id=request.user.id, default=True)
+    except Address.DoesNotExist:
+        address = False
+
+    try:
         orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
         orders_count = orders.count()
         userprofile = get_object_or_404(UserProfile, user_id=request.user.id)
         context = {
             'orders_count': orders_count,
             'userprofile': userprofile,
+            'address': address,
         }
     except:
         None
@@ -356,3 +336,141 @@ def order_detail(request, order_id):
         'ordered_products': ordered_products,
     }
     return render(request, 'order/order_detail.html', context)
+
+
+@login_required(login_url='login')
+def addresses(request):
+
+    try:
+        addresses = Address.objects.filter(user__id=request.user.id)
+    except:
+        addresses = Address()
+
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address_line_1 = form.cleaned_data['address_line_1']
+            address_line_2 = form.cleaned_data['address_line_2']
+            city = form.cleaned_data['city']
+            # obtener el valor seleccionado del select: key & value con request.POST
+            state = request.POST['inputState'] # hace referencia la 'key' al 'name' del select o input
+            country = form.cleaned_data['country']
+            zipcode = form.cleaned_data['zipcode']
+            phone = form.cleaned_data['phone']
+            nearby = form.cleaned_data['nearby']
+            default = form.cleaned_data['default']
+            is_active = form.cleaned_data['is_active']
+            try:
+                address = Address()            
+                address.address_line_1 = address_line_1
+                address.address_line_2 = address_line_2
+                address.city = city
+                address.state = state
+                address.country = country
+                address.zipcode = zipcode
+                address.phone = phone
+                address.nearby = nearby
+                address.default = default
+                address.is_active = is_active
+                address.user = request.user
+                address.save()
+
+            except:
+                print("No se pudo crear el registro de la tabla DIRECCION")
+        url = request.META.get('HTTP_REFERER') # Regresa a url anterior
+        return redirect(url)
+    else:
+        if addresses.exists():
+            context = {
+                'addresses': addresses,
+            }
+        else:
+            address_form = AddressForm()
+            context = {
+                'addresses': addresses,
+                'address_form': address_form,
+                'states_mx': STATES_MX,
+            }
+            
+        return render(request, "account/address.html", context)
+
+
+def address_deactivate(request, address_id):
+    address = get_object_or_404(Address, id=address_id)
+    if address.is_active:
+        address.is_active = False
+    else:
+        address.is_active = True
+    address.save()
+    url = request.META.get('HTTP_REFERER') # Regresa a url anterior
+    return redirect(url)
+
+
+@login_required(login_url = 'login')
+def edit_address(request, address_id):
+
+    address = get_object_or_404(Address, id=address_id)
+    if request.method == 'POST':
+        state = request.POST['inputState']
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            try:
+                form.save()
+                address.state = state
+                address.save()
+                messages.success(request, 'Datos de dirección se actualizaron.')
+            except:
+                print("No se pudo actualizar el registro de la tabla DIRECCION")
+        return redirect(addresses)
+    else:
+        address_form = AddressForm(instance=address) # 'instance' es para editar la instancia que ya existe
+        context = {
+            'address_form': address_form,
+            'address':address,
+            'states_mx': STATES_MX,
+        }
+        return render(request, 'account/edit_address.html', context)
+    
+@login_required(login_url='login')
+def add_address(request):
+
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address_line_1 = form.cleaned_data['address_line_1']
+            address_line_2 = form.cleaned_data['address_line_2']
+            city = form.cleaned_data['city']
+            state = request.POST['inputState'] # hace referencia la 'key' al 'name' del select o input
+            country = form.cleaned_data['country']
+            zipcode = form.cleaned_data['zipcode']
+            phone = form.cleaned_data['phone']
+            nearby = form.cleaned_data['nearby']
+            default = form.cleaned_data['default']
+            is_active = form.cleaned_data['is_active']
+            try:
+                address = Address()            
+                address.address_line_1 = address_line_1
+                address.address_line_2 = address_line_2
+                address.city = city
+                address.state = state
+                address.country = country
+                address.zipcode = zipcode
+                address.phone = phone
+                address.nearby = nearby
+                address.default = default
+                address.is_active = is_active
+                address.user = request.user
+                address.save()
+                messages.success(request, 'Se agrego la dirección.')
+            except:
+                print("No se pudo crear el registro de la tabla otra DIRECCION")
+
+        return redirect(addresses)
+    else:
+        address_form = AddressForm()
+        context = {
+            'address_form': address_form,
+            'states_mx': STATES_MX,
+        }
+        
+        return render(request, "account/add_address.html", context)

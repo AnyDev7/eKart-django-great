@@ -28,11 +28,16 @@
                         </div>
                         <br>
                         <h6 class="text-muted">Enviar a:</h6>
-                        <p>Juan Perez <br>  
-                        Telefono +52 238 380 1319 Email: ventas@anydev7.com <br>
-                        Dirección: Reforma Norte 3233,  Tehuacán, Puebla, México <br> 
-                        CP 75719
-                         </p>
+                        {% if address %}
+                            <p class="text-muted">{{address.user.first_name}} {{address.user.last_name}}<br>
+                            Telefono: {{address.phone}} Email: {{address.user.email}} <br>
+                            Dirección: {{address.address_line_1}}, {{address.city}}, {{address.state}}, {{address.country}} <br> 
+                            CP {{address.zipcode}}
+                            </p>
+                        {% else %}
+                        
+                            <p class="text-muted">No tienes una<a href=" {% url "addresses" %}"> dirección favorita </a>predeterminada.</p>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         <div class="card" style="text-align: center;">

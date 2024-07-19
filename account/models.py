@@ -39,30 +39,6 @@ class MyAccountManager(BaseUserManager):
         return user
 
 
-class Address(models.Model):
-    address_line_1 = models.CharField("Direccion", max_length=50)
-    address_line_2 = models.CharField("...Direccion", max_length=50, blank=True)
-    city = models.CharField('Ciudad', max_length=50)
-    state = models.CharField('Estado', max_length=50)
-    country = models.CharField('Pais', max_length=50)
-    zipcode = models.CharField('CP', max_length=10, default="")
-    phone = models.CharField('Telefono',max_length=50)
-    default = models.BooleanField('Predefinida', default=False)
-    is_active = models.BooleanField('Acitva', default=True)
-    created_at = models.DateTimeField('Creada el', auto_now_add=True)
-    updated_at = models.DateTimeField('Actualizada el', auto_now=True)
-    
-
-    class Meta:
-        verbose_name = 'Direccion'
-        verbose_name_plural = 'Direcciones'
-    
-    def full_address(self):
-        return f"{self.address_line_1} {self.address_line_2}" 
-    
-    def __str__(self):
-        return f"{self.address_line_1} - {self.city}"
-
 # Borrar, es para Mesas de FoodTruck App
 # https://stackoverflow.com/questions/11278074/how-do-i-display-django-model-choice-list-in-a-template
 # https://docs.djangoproject.com/en/5.0/ref/forms/widgets/
@@ -83,7 +59,7 @@ class Account(AbstractBaseUser):
     city = models.CharField('Ciudad', max_length=50, default="")
     state = models.CharField('Estado', max_length=50, default="")
     country = models.CharField('Pais', max_length=50, default="")
-    addresses = models.ManyToManyField(Address, verbose_name='Direcciones', blank=True)
+    #addresses = models.ManyToManyField(Address, verbose_name='Direcciones', blank=True)
 
     # requeridos
     joined_at = models.DateTimeField(auto_now_add=True)
@@ -131,3 +107,29 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.first_name
+    
+class Address(models.Model):
+    user = models.ForeignKey(Account, verbose_name="Usuario", on_delete=models.CASCADE)
+    address_line_1 = models.CharField("Direccion", max_length=50)
+    address_line_2 = models.CharField("Colonia", max_length=50, blank=True)
+    city = models.CharField('Ciudad', max_length=50)
+    state = models.CharField('Estado', max_length=50)
+    country = models.CharField('Pais', max_length=50, default="México")
+    zipcode = models.CharField('CP', max_length=6, default="")
+    phone = models.CharField('Telefono',max_length=50)
+    nearby = models.CharField("Referencia", max_length=100, blank=True)
+    default = models.BooleanField('Preferida', default=False)
+    is_active = models.BooleanField('Acitva', default=True)    
+    created_at = models.DateTimeField('Creada el', auto_now_add=True)
+    updated_at = models.DateTimeField('Actualizada el', auto_now=True)
+    
+
+    class Meta:
+        verbose_name = 'Direccion'
+        verbose_name_plural = 'Direcciones'
+    
+    def full_address(self):
+        return f"{self.address_line_1} {self.address_line_2}" 
+    
+    def __str__(self):
+        return f"{self.address_line_1} - {self.city}"

@@ -3,78 +3,108 @@
 
 {% block content %}
 
-<section class="section-content padding-y bg">
+<section class="section-content padding-y bg" style="background: #e0e0e0">
 <div class="container">
 <!-- ============================ COMPONENT 1 ================================= -->
 <div class="row">    
     <aside class="col-lg-6">
     <div class="card">
     <div class="card-body">
-        {% include "mainapp/includes/alerts.html" %}
-        <h5 class="card-tit mb-4">Dirección de ventas</h5>
-    <form action="{% url "place_order" %}" method="POST">
+    {% include "mainapp/includes/alerts.html" %}
+    <h5 class="card-tit mb-2">Revisa el envío y su costo</h5>
+    <hr>
+    {% if address_option == True %} 
+    <form action="{% url "place_order" shipment_option address.id %}" method="POST">
+    {% elif pickup_option == True %}
+    <form action="{% url "place_order" shipment_option 0 %}" method="POST">
+    {% endif %}
         {% csrf_token %}
         {{ form.errors }}
         {{ form.non_field_errors }}
+            
+            {% if address_option %}                
+                <!--Se quito div "form-row" y div "col form-group"-->    
+                <small><label>
+                    <span> <b> Enviar a domicilio </b></span>
+                    <p class="text-muted">{{address.address_line_1}}, {{address.address_line_2}}<br>
+                        {{address.city}}, {{address.state}}, {{address.country}} <br>
+                        CP {{address.zipcode}} Tel: {{address.phone}}
+                    </p>
+                </label></small>
+
+            {% endif %}
+            {% if pickup_option %}
+                <label>
+                    <span> <b> Retira en nuestra bodega </b></span>
+                    <p class="text-muted">2 Norte 452, Col. Centro<br>
+                        Tel: 238 3801223 <br>
+                        Tehuacán, Puebla, México. CP 75700<br> 
+                    </p>
+                </label>
+            {% endif %} 
             <div class="form-row">
                 <div class="col form-group">
-                    <label for="">Nombre(s)</label>
-                    <input value="{{user.first_name}}" type="text" name="first_name" class="form-control" required>
+                    <small> <b>Observaciones del pedido:</b> 
+                    <label> "{{order_note}}" </label> </small> 
                 </div>
                 <div class="col form-group">
-                    <label for="">Apellidos</label>
-                    <input value="{{user.last_name}}" type="text" name="last_name" class="form-control" required>
+                    <label> </label>
                 </div>
-            </div>
-            <div class="form-row">
-                <div class="col form-group">
-                    <label for="">Email</label>
-                    <input value="{{user.email}}" type="email" name="email" class="form-control" required>
-                </div>
-                <div class="col form-group">
-                    <label for="">Teléfono</label>
-                    <input value="{{user.phone}}" type="text" name="phone" class="form-control" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col form-group">
-                    <label for="">Dirección</label>
-                    <input type="text" name="address_line_1" class="form-control" required>
-                </div>
-                <div class="col form-group">
-                    <label for="">Colonia</label>
-                    <input type="text" name="address_line_2" class="form-control" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col form-group">
-                    <label for="">Ciudad</label>
-                    <input value="{{user.city}}" type="text" name="city" class="form-control" required>
-                </div>
-                <div class="col form-group">
-                    <label for="">Estado</label>
-                    <input value="{{user.state}}" type="text" name="state" class="form-control" required>
-                </div>                
-            </div>
-            <div class="form-row">
-                <div class="col form-group">
-                    <label for="">CP</label>
-                    <input type="text" name="zipcode" class="form-control" required>
-                </div>
-                <div class="col form-group">
-                    <label for="">Pais</label>
-                    <input value="{{user.country}}" type="text" name="country" class="form-control" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <label for="">Observaciones del pedido</label>
-                <textarea name="order_note" rows="2" cols="80" required></textarea>
             </div>
         <!-- No estaba aqui el '</form>' -->
     </div>
     </div> <!-- card.// -->
+    <br>
 
+    <!--Card de opciones de envío-->
+    {% if not pickup_option %}
+    <div class="card">
+        <div class="card-body">
+        <h5 class="card-tit mb-3">Opciones de envío:</h5>
+        <hr>
+        <div class="form-row">
+            <div class="col form-group">
+                <div class="form-check">
+                    <input value="99.00-Fletera" class="form-check-input" type="radio" name="shipment" checked>
+                    <label class="form-check-label" for="shipment">
+                        <span style="color: black;"> Envio por fletera        $99.00 </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col form-group">
+                <div class="form-check">
+                    <input value="799.00-PaqueteExpress" class="form-check-input" type="radio" name="shipment" >
+                    <label class="form-check-label" for="shipment">
+                        <span style="color: black;"> Envio por paqueteria    $799.00</span>
+                    </label>
+                </div>
+            </div>
+        </div>    
+        </div> <!-- card body-->
+    </div> <!-- card.// -->
+    {% elif pickup_option == True %}
+    <div class="card">
+        <div class="card-body">
+        <h5 class="card-tit mb-3">Opciones de envío:</h5>
+        <hr>
+        <div class="form-row">
+            <div class="col form-group">
+                <div class="form-check">
+                    <input value="0-pickup" class="form-check-input" type="radio" name="shipment" checked>
+                    <label class="form-check-label" for="shipment">
+                        <span style="color: black;"> Sin costo        $0.00 </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        </div> <!-- card body-->
+    </div> <!-- card.// -->
+
+    {% endif %}
     </aside> <!-- col.// -->
+
     <aside class="col-lg-6">
 
             <div class="card">
@@ -136,10 +166,31 @@
                     
                     </tbody>
                 </table>
+                {% if pickup_option %}
                 <div class="card">
                     <div class="card-body">
                         <dl class="dlist-align">
-                          <dt>Total carrito:</dt>
+                          <dt>Total producto:</dt>
+                          <dd class="text-right">${{total|floatformat:"2g"}}</dd>
+                        </dl>
+                        
+                        <dl class="dlist-align">
+                          <dt>Total a pagar:</dt>
+                          <dd class="text-right text-dark b"><strong>${{total|floatformat:"2g" }}</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="{% static "./images/misc/payments.png" %}" height="26">
+                        </p>
+                    </div> <!-- card-body.// -->
+                </div> <!-- card.// -->
+                <br>                
+                <button type="submit" name="submit" class="btn btn-primary btn-block"> Realizar Pedido ${{total|floatformat:"2g"}}</button>
+                {% elif address_option %}
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                          <dt>Total producto:</dt>
                           <dd class="text-right">${{total|floatformat:"2g"}}</dd>
                         </dl>
                         <dl class="dlist-align">
@@ -147,7 +198,7 @@
                             <dd class="text-right"> ${{ship_cost|floatformat:"2g" }}</dd>
                           </dl>
                         <dl class="dlist-align">
-                          <dt>Total:</dt>
+                          <dt>Total a pagar:</dt>
                           <dd class="text-right text-dark b"><strong>${{g_total|floatformat:"2g" }}</strong></dd>
                         </dl>
                         <hr>
@@ -156,8 +207,10 @@
                         </p>
                     </div> <!-- card-body.// -->
                 </div> <!-- card.// -->
-                <br>
+                
+                <br>                
                 <button type="submit" name="submit" class="btn btn-primary btn-block"> Realizar Pedido ${{g_total|floatformat:"2g"}}</button>
+                {% endif %}
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
 

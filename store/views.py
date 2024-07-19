@@ -13,6 +13,7 @@ from ecart.models import Cart, CartItem
 from ecart.views import _cart_id
 from .forms import formRating
 from order.models import OrderProduct
+from account.models import UserProfile
 
 # Create your views here.
 """
@@ -108,10 +109,13 @@ def product_detail(request, category_slug, product_slug):
     if request.user.is_authenticated:
         try:
                 orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
+                userprofile = UserProfile.objects.get(user__id=request.user.id)
+                print(userprofile) # Borrar
         except OrderProduct.DoesNotExist:
             orderproduct = False
     else:
-        orderproduct = False    
+        orderproduct = False
+        userprofile = False
 
     # Las calificaciones de este producto
     try: 
@@ -137,6 +141,7 @@ def product_detail(request, category_slug, product_slug):
             'orderproduct': orderproduct,
             'ratings': ratings,
             'product_gallery': product_gallery,
+            'userprofile': userprofile,
     }
     #return render(request, "store/product_detail_1.html", context)  # Sin variaciones
     return render(request, "store/product_detail_vars.html", context) # OK

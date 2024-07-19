@@ -5,6 +5,8 @@ from ecart.models import CartItem
 from .forms import OrderForm
 from .models import Order, Payment, OrderProduct
 from store.models import Product
+from account.models import Address
+
 import datetime
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -93,16 +95,30 @@ def payment(request):
     return JsonResponse(data)
 
 
-def place_order(request, total=0, quantity=0):
+def place_order(request, shipment_option, address_id=None, total=0, quantity=0):
     current_user = request.user
-    cart_items = CartItem.objects.filter(user=current_user)
-    cart_count = cart_items.count()
-    if cart_count <= 0:
-        return redirect('store')
-    g_total = 0
-    tax = 0
+    cart_count = 0
+    ship_cost = 99  # Crear tabla para tax y para ship_cost (por zonas por estados calcular tarifa)
+    tax = 0 #Cálculo de impuestos: (2 * total)/100
     sub_total = 0
-    ship_cost = 0
+    g_total = 0
+    address = None
+
+    try:
+        cart_items = CartItem.objects.filter(user=current_user)
+        cart_count = cart_items.count()
+    except:
+        if cart_count <= 0:
+            return redirect('store')
+    
+    if shipment_option == 'pickup':
+        ship_cost = 0
+    else:
+        try:
+            address = Address.objects.get(id=address_id)
+        except Address.DoesNotExist:
+            return redirect('store')
+    
     for cart_item in cart_items:
         cart_price = 0
         # Aqui se puede verificar si el precio sigue siendo de promocion.
@@ -114,11 +130,9 @@ def place_order(request, total=0, quantity=0):
         cart_item.price = cart_price
         cart_item.save()
 
-    ship_cost = 99  # Crear tabla para tax y para ship_cost (por zonas por estados calcular tarifa)
+    
     ship_total = total + ship_cost
-
-    tax = 0 #Cálculo de impuestos: (2 * total)/100
-    g_total = ship_total # debería ser si se cobran impuestos: g_total = ship_total + tax
+    g_total = ship_total + tax # debería ser si se cobran impuestos: g_total = ship_total + tax
 
     if request.method == 'POST':
         """
@@ -139,12 +153,21 @@ def place_order(request, total=0, quantity=0):
                 data.last_name = form.cleaned_data['last_name']
                 data.phone = form.cleaned_data['phone']
                 data.email = form.cleaned_data['email']
-                data.address_line_1 = form.cleaned_data['address_line_1']
-                data.address_line_2 = form.cleaned_data['address_line_2']
-                data.country = form.cleaned_data['country']
-                data.state = form.cleaned_data['state']
-                data.city = form.cleaned_data['city']
-                data.zipcode = form.cleaned_data['zipcode']
+                if shipment_option == "pickup":
+                    data.shipment = False
+                    data.address_line_1 = "cliente retira en nuestra bodega"
+                    data.address_line_2 = "cliente retira en nuestra bodega"
+                    data.country = ""
+                    data.state = ""
+                    data.city = ""
+                    data.zipcode = ""
+                else:
+                    data.address_line_1 = address.address_line_1
+                    data.address_line_2 = address.address_line_2
+                    data.country = address.country
+                    data.state = address.state
+                    data.city = address.city
+                    data.zipcode = address.zipcode
                 data.note = form.cleaned_data['note']
                 data.sub_total = total # total de productos antes de envio e impuestos
                 data.ship_cost = ship_cost                

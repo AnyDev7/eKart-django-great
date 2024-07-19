@@ -178,3 +178,40 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
 
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
+# Agregar varibale de entorno a: '.env'
+# Cambiar el texto explicito por el dic de 'decouple'
+STATES_MX = [
+    'Aguascalientes',
+    'Baja California',
+    'Baja California Sur',
+    'Campeche',
+    'Chiapas',
+    'Chihuahua',
+    'Ciudad de México',
+    'Coahuila de Zaragoza',
+    'Colima',
+    'Durango',
+    'Estado de México',
+    'Guanajuato',
+    'Guerrero',
+    'Hidalgo',
+    'Jalisco',
+    'Michoacán de Ocampo',
+    'Morelos',
+    'Nayarit',
+    'Nuevo León',
+    'Oaxaca',
+    'Puebla',
+    'Querétaro',
+    'Quintana Roo',
+    'San Luis Potosí',
+    'Sinaloa',
+    'Sonora',
+    'Tabasco',
+    'Tamaulipas',
+    'Tlaxcala',
+    'Veracruz de Ignacio de la Llave',
+    'Yucatán',
+    'Zacatecas'
+    ]

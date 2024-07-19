@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<section class="section-content padding-y bg">
+<section class="section-content padding-y bg" style="background: #e0e0e0">
 <div class="container">
 
 	<!-- ============================ COMPONENT 1 ================================= -->
@@ -74,7 +74,7 @@
 							{% for var in varsall %}
 								{% ifchanged var.variation.varcat %}
 									<span><b> {{var.variation.varcat}} </b></span>
-									<select name="{{var.variation.varcat}}" class="form-control" required>									
+									<select name="{{var.variation.varcat}}" class="form-control" required>
 										<option value="" disabled selected>Elija una opción</option>
 										
 										{% for i in varsall %}
@@ -200,8 +200,8 @@
 		{% for rate in ratings %}
 		<article class="box mb-3">
 			<div class="icontext w-100">
-				{% comment "<img src=" {% static "./images/avatars/avatar1.jpg" %} " class="img-xs icon rounded-circle">" %}{% endcomment %}				
-				<img src=" {% static "./images/avatars/avatar1.jpg" %} " class="img-xs icon rounded-circle">
+				{% comment "<img src="./images/avatars/avatar2.jpg"{{userprofile.picture.url}} class="img-xs icon rounded-circle">" %}{% endcomment %}				
+				<img {% if userprofile %} src="{{userprofile.picture.url}}" {% else %} src={% static "./images/avatars/avatar_img_nogender_1.png" %} {% endif %}  class="img-xs icon rounded-circle" alt={{userprofile.user.first_name}}>
 				<div class="text">
 					<span class="date text-muted float-md-right">{{rate.updated_at}}</span>  
 					<h6 class="mb-1">{{rate.user.full_name}}</h6>

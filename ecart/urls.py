@@ -1,6 +1,8 @@
 from django.urls import path
 from ecart import views
 
+
+
 urlpatterns = [
     path('', views.ecart, name="ecart"),
     path('add-prod/<int:product_id>/<int:flag>/', views.add_prod, name="add_prod"),
@@ -8,5 +10,6 @@ urlpatterns = [
     path('minus-add-to-prod/<int:product_id>/<int:cart_item_id>/<int:flag>/', views.minus_add_to_prod, name="minus_add_to_prod"),
 
     path('checkout/', views.checkout, name="checkout"),
+    path('select-address/<str:total>/', views.select_address, name="select_address"),
 ]
 

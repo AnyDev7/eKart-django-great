@@ -1,5 +1,18 @@
 from django import forms
-from .models import Account, UserProfile
+from .models import Address, Account, UserProfile
+
+#https://docs.djangoproject.com/en/5.0/topics/forms/modelforms/
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['address_line_1', 'address_line_2', 'city', 'country', 'zipcode', 'phone', 'nearby', 'default', 'is_active']
+    
+    def __init__(self, *args, **kwargs):
+        super(AddressForm, self).__init__(*args, **kwargs)
+        for x in self.fields:
+            self.fields[x].widget.attrs['class'] = 'form-control'
+        
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -21,6 +34,7 @@ class RegisterForm(forms.ModelForm):
         ("NLD", "Mesa 3"),
     )
     tables = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=TABLES) # Borrar
+# Hasta aqui borrar
 
     class Meta:
         model = Account
@@ -53,12 +67,6 @@ class UserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
-        #self.fields['first_name'].widget.attrs['placeholder'] = 'ingresa tu nombre'
-        #self.fields['last_name'].widget.attrs['placeholder'] = 'ingresa tus apellidos'
-        #self.fields['phone'].widget.attrs['placeholder'] = 'ingresa tu telefono'
-        #self.fields['city'].widget.attrs['placeholder'] = 'ingresa tu ciudad'
-        #self.fields['country'].widget.attrs['placeholder'] = 'ingresa tu pais'
-        #self.fields['country'].widget.attrs['value'] = 'México'
         for x in self.fields:
             self.fields[x].widget.attrs['class'] = 'form-control'
 
@@ -73,4 +81,6 @@ class UserProfileForm(forms.ModelForm):
         for x in self.fields:
             self.fields[x].widget.attrs['class'] = 'form-control'
 
+#
+# https://developer.mozilla.org/es/docs/Learn/Server-side/Django/Forms
 # Form validation Bootstrap: https://getbootstrap.com/docs/5.0/forms/validation/

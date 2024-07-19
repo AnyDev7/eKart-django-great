@@ -48,6 +48,7 @@ class Order(models.Model):
     tax = models.FloatField("Impuestos")
     total = models.FloatField("Total")
     status = models.CharField("Estatus", max_length=15, choices=STATUS, default="Nueva")
+    shipment = models.BooleanField("¿Enviar?", default=True)
     ip = models.CharField("IP", max_length=20, blank=True)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField("Creada", auto_now_add=True)
