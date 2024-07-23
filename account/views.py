@@ -340,13 +340,8 @@ def order_detail(request, order_id):
 
 @login_required(login_url='login')
 def addresses(request):
-
-    try:
-        addresses = Address.objects.filter(user__id=request.user.id)
-    except:
-        addresses = Address()
-
-    if request.method == 'POST':
+    
+    if request.method == 'POST': # Agregar su primer dirección
         form = AddressForm(request.POST)
         if form.is_valid():
             address_line_1 = form.cleaned_data['address_line_1']
@@ -380,6 +375,12 @@ def addresses(request):
         url = request.META.get('HTTP_REFERER') # Regresa a url anterior
         return redirect(url)
     else:
+
+        try:
+            addresses = Address.objects.filter(user__id=request.user.id)
+        except:
+            addresses = Address()
+
         if addresses.exists():
             context = {
                 'addresses': addresses,
@@ -421,6 +422,17 @@ def edit_address(request, address_id):
                 messages.success(request, 'Datos de dirección se actualizaron.')
             except:
                 print("No se pudo actualizar el registro de la tabla DIRECCION")
+            
+            if address.default == True:
+                try:
+                    my_addresses = Address.objects.filter(user__id=request.user.id)
+                    for item in my_addresses:
+                        if item.id != address.id:
+                            item.default = False
+                            item.save()
+                except Address.DoesNotExist:
+                    None
+        
         return redirect(addresses)
     else:
         address_form = AddressForm(instance=address) # 'instance' es para editar la instancia que ya existe
@@ -431,6 +443,8 @@ def edit_address(request, address_id):
         }
         return render(request, 'account/edit_address.html', context)
     
+
+
 @login_required(login_url='login')
 def add_address(request):
 
@@ -465,6 +479,16 @@ def add_address(request):
             except:
                 print("No se pudo crear el registro de la tabla otra DIRECCION")
 
+            if address.default == True:
+                try:
+                    my_addresses = Address.objects.filter(user__id=request.user.id)
+                    for item in my_addresses:
+                        if item.id != address.id:
+                            item.default = False
+                            item.save()
+                except Address.DoesNotExist:
+                    None
+                    
         return redirect(addresses)
     else:
         address_form = AddressForm()

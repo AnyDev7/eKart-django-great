@@ -143,7 +143,7 @@ def product_detail(request, category_slug, product_slug):
             'product_gallery': product_gallery,
             'userprofile': userprofile,
     }
-    #return render(request, "store/product_detail_1.html", context)  # Sin variaciones
+    
     return render(request, "store/product_detail_vars.html", context) # OK
 
 

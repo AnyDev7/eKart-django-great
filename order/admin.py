@@ -9,9 +9,9 @@ class OrderProductInline(admin.TabularInline):
     extra = 0
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('number', 'full_name', 'email', 'city', 'created_at', 'total', 'status', 'is_ordered')
-    list_filter = ('status', 'is_ordered')
-    ordering = ('-created_at',)
+    list_display = ('number', 'full_name', 'email', 'city', 'created_at', 'total', 'status', 'is_ordered', 'shipment', 'pickup')
+    list_filter = ('status', 'is_ordered', 'shipment', 'pickup')
+    ordering = ('-created_at', 'status', 'is_ordered', 'shipment', 'pickup')
     search_fields = ('number', 'first_name', 'last_name', 'phone', 'email', 'city')
     readonly_fields = ('number', 'total')
     list_display_links = ('full_name', 'number', 'email')

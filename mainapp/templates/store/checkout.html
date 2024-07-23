@@ -14,9 +14,9 @@
     <h5 class="card-tit mb-2">Revisa el envío y su costo</h5>
     <hr>
     {% if address_option == True %} 
-    <form action="{% url "place_order" shipment_option address.id %}" method="POST">
+    <form action="{% url "place_order" shipment_option order_note address.id %}" method="POST">
     {% elif pickup_option == True %}
-    <form action="{% url "place_order" shipment_option 0 %}" method="POST">
+    <form action="{% url "place_order" shipment_option order_note 0 %}" method="POST">
     {% endif %}
         {% csrf_token %}
         {{ form.errors }}
@@ -87,16 +87,22 @@
     {% elif pickup_option == True %}
     <div class="card">
         <div class="card-body">
-        <h5 class="card-tit mb-3">Opciones de envío:</h5>
+        <h5 class="card-tit mb-3">Retiro en almacén:</h5>
         <hr>
         <div class="form-row">
             <div class="col form-group">
                 <div class="form-check">
                     <input value="0-pickup" class="form-check-input" type="radio" name="shipment" checked>
-                    <label class="form-check-label" for="shipment">
-                        <span style="color: black;"> Sin costo        $0.00 </span>
+                        <label class="form-check-label" for="shipment">
+                        <span style="color: black;"> Sin costo $0.00 </span>
                     </label>
                 </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="">Instrucciones para retiro</label>
+                <textarea name="pickup_instructions" rows="2" cols="52" required></textarea>
             </div>
         </div>
         </div> <!-- card body-->
@@ -193,14 +199,7 @@
                           <dt>Total producto:</dt>
                           <dd class="text-right">${{total|floatformat:"2g"}}</dd>
                         </dl>
-                        <dl class="dlist-align">
-                            <dt>Envio:</dt>
-                            <dd class="text-right"> ${{ship_cost|floatformat:"2g" }}</dd>
-                          </dl>
-                        <dl class="dlist-align">
-                          <dt>Total a pagar:</dt>
-                          <dd class="text-right text-dark b"><strong>${{g_total|floatformat:"2g" }}</strong></dd>
-                        </dl>
+                        
                         <hr>
                         <p class="text-center mb-3">
                             <img src="{% static "./images/misc/payments.png" %}" height="26">
@@ -209,7 +208,7 @@
                 </div> <!-- card.// -->
                 
                 <br>                
-                <button type="submit" name="submit" class="btn btn-primary btn-block"> Realizar Pedido ${{g_total|floatformat:"2g"}}</button>
+                <button type="submit" name="submit" class="btn btn-primary btn-block"> Realizar Pedido</button>
                 {% endif %}
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->

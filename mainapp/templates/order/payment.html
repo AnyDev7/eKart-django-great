@@ -17,8 +17,8 @@
 		  <p class="card-text mb-0">{{order.full_address}}</p>
 		  <p class="card-text mb-0">{{order.city}}, {{order.state}}, {{order.country}}.  CP {{order.zipcode}}  </p>
 		  <p class="card-text mb-0">{{order.email}} | Tel. {{order.phone}} </p>
-		  {% if order.order_note %}  <p class="card-text mb-0"> <b>Observaciones de tu compra:</b> {{order.order_note}}</p>
-		  {% else %} <p class="card-text mb-0">Sin observaciones de compra.</p> 
+		  {% if order.note %}  <p class="card-text mb-0"> <b>Observaciones de tu compra:</b> <small>"{{order.note}}"</small></p>
+		  {% else %} <p class="card-text mb-0"> <small>"Sin observaciones"</small></p> 
 		  {% endif %}
 		  
           

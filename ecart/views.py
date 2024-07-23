@@ -25,13 +25,15 @@ def get_first_key(dictionary):
 
 
 def add_prod(request, product_id, flag=False): # ADD_CART course
+    try:
+        product = Product.objects.get(id=product_id) # Get the product
+    except Product.DoesNotExist:
+        return redirect('store')
     
-    product = get_object_or_404(Product, id=product_id) # Get the product
     # if the user is authenticated
     current_user = request.user
     if current_user.is_authenticated:
         product_variations = []
-        
         if request.method == 'POST':
             option = []
             first_key = get_first_key(request.POST) # Dic de POST: key= "name" value= "value o contenido"
@@ -48,9 +50,11 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
                 try:
                     # '__iexact' no importa si son mayusculas o minusculas
                     if len(value_stock) > 0:
-                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                        #OK variations = StockVar.objects.all().filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                        variations = StockVar.objects.filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
                     else:
-                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value))
+                        #OK variations = StockVar.objects.all().filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value))
+                        variations = StockVar.objects.filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value))
                     
                     for var in variations: 
                         product_variations.append(var)
@@ -61,7 +65,7 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
         cart_item_exists = CartItem.objects.filter(product = product, user=current_user).exists()
 
         if cart_item_exists:
-            cart_items = CartItem.objects.filter(product=product, user=current_user) 
+            cart_items = CartItem.objects.filter(product__id=product.id, user=current_user) 
             exist_var_list = []
             id_cartitem_list = []
             # Manejo de listas e índices, checar si current_vars are in existing_vars
@@ -123,9 +127,11 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
                 try:
                     #debe ser get(), no filter()           # '__iexact' no importa si son mayusculas o minusculas
                     if len(value_stock) > 0:
-                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                        #OK variations = StockVar.objects.all().filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
+                        variations = StockVar.objects.filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value), value__iexact=value_stock)
                     else:
-                        variations = StockVar.objects.all().filter(product=product_id, variation = Variation.objects.get(variation__iexact=value))
+                        #OK variations = StockVar.objects.all().filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value))
+                        variations = StockVar.objects.filter(product__id=product_id, variation = Variation.objects.get(variation__iexact=value))
                     
                     for var in variations: 
                         product_variations.append(var)
@@ -194,7 +200,8 @@ def add_prod(request, product_id, flag=False): # ADD_CART course
 
         return redirect('ecart')
 
-# teclas de aumentar y disminuir cantidad en el carrito
+
+
 def minus_add_to_prod(request, product_id, cart_item_id, flag=False):        
     try:
         product = get_object_or_404(Product, id=product_id)
@@ -215,6 +222,7 @@ def minus_add_to_prod(request, product_id, cart_item_id, flag=False):
         pass
     return redirect('ecart')
     
+
 
 def remove_item(request, product_id, cart_item_id):
     
@@ -273,9 +281,20 @@ def ecart(request, total=0, quantity=0, cart_items=None):
     'cart_items': cart_items,
     }
     return render(request, 'store/ecart.html', context)
-    
+
+
+def direct_purchase(request, product_id):
+    # Se debe programar con <script> js
+    return
+
+
+
 @login_required(login_url='login')
-def select_address(request, total=""):
+def select_address(request, total="", flag=0):
+    # flag=0 compra directa
+    # flag=1 compra desde carrito
+    # Crear proceso alterno de: direct_purchase
+    
     try:
         address = Address.objects.filter(user__id=request.user.id,  default=True).first()
     except Address.DoesNotExist:
@@ -285,27 +304,6 @@ def select_address(request, total=""):
     if address == None:
         address = False
         messages.warning(request, 'No tienes una direccion favorita predeterminada.')
-        
-
-        """
-        try:
-            addresses = Address.objects.filter(user__id=request.user.id)
-        except:
-            addresses = Address()
-
-        if addresses.exists():
-            context = {
-                'addresses': addresses,
-            }
-        else:
-            address_form = AddressForm()
-            context = {
-                'addresses': addresses,
-                'address_form': address_form,
-                #'states_mx': STATES_MX,
-            }
-        return render(request, "account/address.html", context)
-        """
             
     context = {
     'total': float(total),
@@ -361,8 +359,8 @@ def checkout(request, address_id=0, total=0, tax=0, ship_cost=0, g_total=0, quan
         # Revisar si aplica esto para vendedores nacionales
         ship_cost = 99
         ship_total = total + ship_cost
-        tax = (2 * total)/100
-        g_total = ship_total # debería ser si se cobran impuestos: g_total = ship_total + tax
+        tax = 0
+        g_total = ship_total + tax # debería ser si se cobran impuestos: g_total = ship_total + tax
 
     except Cart.DoesNotExist or CartItem.DoesNotExist:
         cart_items = None

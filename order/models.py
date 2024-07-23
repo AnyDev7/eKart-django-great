@@ -49,8 +49,12 @@ class Order(models.Model):
     total = models.FloatField("Total")
     status = models.CharField("Estatus", max_length=15, choices=STATUS, default="Nueva")
     shipment = models.BooleanField("¿Enviar?", default=True)
+    pickup = models.BooleanField("¿Retiro?", default=False)
+    pickup_instructions = models.CharField('Comentarios para recolección', max_length=200, blank=True)
     ip = models.CharField("IP", max_length=20, blank=True)
-    is_ordered = models.BooleanField(default=False)
+    is_ordered = models.BooleanField("Ordenada", default=False)
+    logistic_supp = models.CharField('Proveedor de logística', max_length=50, blank=True, default="")
+    #logistic_supp = models.ForeignKey(Logistic, verbose_name='Proveedor de logística', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField("Creada", auto_now_add=True)
     updated_at = models.DateTimeField("Actualizada", auto_now=True)
 
@@ -60,6 +64,8 @@ class Order(models.Model):
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+    
+    full_name.short_description = 'Usuario'
     
     def full_address(self):
         return f"{self.address_line_1} {self.address_line_2}"

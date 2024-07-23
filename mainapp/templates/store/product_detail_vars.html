@@ -67,7 +67,6 @@
 					<!-- Checar si esto es igual: product.stockvariations_set.all = varsall Este Sí es igual-->
 					<!-- Checar si esto es igual: product.stockvariations.all = varsall -->
 
-					{% comment "Sí funcionaba para verificar si no estaba en el carrito {% if not in_cart %}" %}{% endcomment %} 
 					<div class="row">
 						<div class="item-option-select">
 							<!-- varsall es un QuerySet (instancias) de StockVar-->
@@ -92,20 +91,15 @@
 							{% endfor %}
 						</div>
 					</div> <!-- row.// -->
-					{% comment "Sí funcionaba para verificar si no estaba en el carrito {% endif %}" %}{% endcomment %} 
+					
 					<hr>
 					{% if prod.stock > 0 %}
-					<!--
-						{% if in_cart %}
-							<a href="{% url "ecart" %}" class="btn  btn-warning"> <span class="text">Ir al carrito </span> <i class="fas fa-shopping-cart"></i>  </a>
-							<a href="{% url "store" %}" class="btn  btn-info"> <span class="text">Continuar comprando </span> <i class="fas fa-check"></i>  </a>
-						{% else %}
-							<button type="submit" class="btn  btn-primary"> <span class="text">Agregar </span> <i class="fas fa-shopping-cart"></i>  </button>
-						{% endif %}
-					-->
-					<!-- Se cambio por esto: -->
-					<button type="submit" class="btn  btn-info"> <span class="text">Agregar al carrito </span> <i class="fas fa-shopping-cart"></i>  </button>
-					<button type="button" class="btn  btn-primary"> <span class="text">Comprar ahora </span> <i class="fas fa-regular fa-heart"></i>  </button>
+					
+						<!-- Si el producto ya existe en el carrito, se agrega 1 pza en la view add_product -->
+						<button type="submit" class="btn  btn-info"> <span class="text">Agregar al carrito </span> <i class="fas fa-shopping-cart"></i>  </button>
+						<button type="button" href="#" class="btn btn-primary"> Comprar ahora <i class="fas fa-regular fa-heart"></i>  </a>
+
+						
 
 					{% else %}
 						<h5 class=text-danger > Sin existencias</h5>

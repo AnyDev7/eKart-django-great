@@ -14,7 +14,7 @@
     <h5 class="card-tit mb-3">Elija la forma de entrega</h5>
     
     {% if not address %}
-                <p style="text-align: right;"><a href=" {% url "addresses" %} " type="button" class="btn btn-success"> <span>Agregar dirección</span> <i class="fa fa-plus"></i> </a></p>             
+                <p style="text-align: right;"><a href=" {% url "addresses" %} " type="button" class="btn btn-success"> <span>Agregar dirección</span> <i class="fa fa-plus"></i> </a></p>
     {% endif %}
     <form action="{% url "checkout" %}" method="POST">
         {% csrf_token %}

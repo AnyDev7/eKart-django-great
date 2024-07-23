@@ -101,22 +101,18 @@
 		<div class="card">
 		<div class="card-body">
 			<dl class="dlist-align">
-			  <dt>Total carrito:</dt>
+			  <dt>Total producto:</dt>
 			  <dd class="text-right">${{total|floatformat:"2g"}}</dd>
 			</dl>
 			<dl class="dlist-align">
-				<dt>Envio:</dt>
-				<dd class="text-right"> ${{ship_cost|floatformat:"2g" }}</dd>
-			  </dl>
-			<dl class="dlist-align">
-			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>${{g_total|floatformat:"2g" }}</strong></dd>
+			  <dt>Pagas:</dt>
+			  <dd class="text-right text-dark b"><strong>${{total|floatformat:"2g" }}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">
 				<img src="{% static "./images/misc/payments.png" %}" height="26">
 			</p>
-			<a href="{% url "select_address" total|stringformat:"i" %}" class="btn btn-primary btn-block"> Comprar ahora </a>
+			<a href="{% url "select_address" total|stringformat:"f" 1 %}" class="btn btn-primary btn-block"> Comprar ahora </a>
 			<a href="{% url "store" %}" class="btn btn-light btn-block">Buscar más</a>
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->

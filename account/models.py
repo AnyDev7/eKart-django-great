@@ -78,9 +78,11 @@ class Account(AbstractBaseUser):
         verbose_name = 'cuenta de usuario'
         verbose_name_plural = 'cuentas de usuario'
     
-    def full_name(self):
+    def full_name(self): #https://stackoverflow.com/questions/2892999/verbose-name-for-a-models-method
         return f"{self.first_name} {self.last_name}"
     
+    full_name.short_description = 'Usuario'
+
     def basic_address(self):
         return f"{self.city} {self.state}"   
     

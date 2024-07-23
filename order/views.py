@@ -95,7 +95,7 @@ def payment(request):
     return JsonResponse(data)
 
 
-def place_order(request, shipment_option, address_id=None, total=0, quantity=0):
+def place_order(request, shipment_option, order_note, address_id=None, total=0, quantity=0):
     current_user = request.user
     cart_count = 0
     ship_cost = 99  # Crear tabla para tax y para ship_cost (por zonas por estados calcular tarifa)
@@ -113,7 +113,11 @@ def place_order(request, shipment_option, address_id=None, total=0, quantity=0):
     
     if shipment_option == 'pickup':
         ship_cost = 0
+        logistic_supp = 'pickup'
     else:
+        option = request.POST.get('shipment')  
+        ship_cost = float(option.split("-")[0]) # Costo del envío
+        logistic_supp = option.split("-")[1] # Proveedor de logística
         try:
             address = Address.objects.get(id=address_id)
         except Address.DoesNotExist:
@@ -144,77 +148,86 @@ def place_order(request, shipment_option, address_id=None, total=0, quantity=0):
         # Borrar
         """
 
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            try:
-                data = Order()
-                data.user = current_user
-                data.first_name = form.cleaned_data['first_name']
-                data.last_name = form.cleaned_data['last_name']
-                data.phone = form.cleaned_data['phone']
-                data.email = form.cleaned_data['email']
-                if shipment_option == "pickup":
-                    data.shipment = False
-                    data.address_line_1 = "cliente retira en nuestra bodega"
-                    data.address_line_2 = "cliente retira en nuestra bodega"
-                    data.country = ""
-                    data.state = ""
-                    data.city = ""
-                    data.zipcode = ""
-                else:
-                    data.address_line_1 = address.address_line_1
-                    data.address_line_2 = address.address_line_2
-                    data.country = address.country
-                    data.state = address.state
-                    data.city = address.city
-                    data.zipcode = address.zipcode
-                data.note = form.cleaned_data['note']
-                data.sub_total = total # total de productos antes de envio e impuestos
-                data.ship_cost = ship_cost                
-                data.tax = tax
-                data.total = g_total
-                data.status = "Recibida"
-                data.ip = request.META.get('REMOTE_ADDR')
-                data.save()
+        #form = OrderForm(request.POST)
+        #if form.is_valid():
+        try:
+            data = Order()
+            data.user_id = current_user.id
+            data.first_name = current_user.first_name
+            data.last_name = current_user.last_name
+            data.email = current_user.email
+            if shipment_option == "pickup":
+                data.shipment = False
+                data.pickup = True
+                data.pickup_instructions = request.POST.get("pickup_instructions")
+                data.phone = current_user.phone
+                data.address_line_1 = "cliente retira en nuestra bodega"
+                data.address_line_2 = ""
+                data.phone = current_user.phone
+                data.country = current_user.country
+                data.state = current_user.state
+                data.city = current_user.city
+                data.zipcode = ""
+            else:
+                data.address_line_1 = address.address_line_1
+                data.address_line_2 = address.address_line_2
+                data.country = address.country
+                data.state = address.state
+                data.city = address.city
+                data.zipcode = address.zipcode
+                data.phone = address.phone
+            data.note = order_note
+            data.sub_total = total # total de productos antes de envio e impuestos
+            data.ship_cost = ship_cost                
+            data.tax = tax
+            data.total = g_total
+            data.status = "Recibida"
+            data.logistic_supp = logistic_supp
+            data.ip = request.META.get('REMOTE_ADDR')
+            data.save()
 
-                # Generate order number
-                yr = int(datetime.date.today().strftime('%Y'))
-                dt = int(datetime.date.today().strftime('%d'))
-                mt = int(datetime.date.today().strftime('%m'))
-                d = datetime.date(yr, mt, dt)
-                current_date = d.strftime('%Y%m%d') #20240611
-                
-                # Rellenar de ceros 5 espacios
-                id_len = len(str(data.id))
-                zeros = ''  # inicializar con 1 '0', para que agregue los ceros indicados
-                if id_len < 6:                
-                    for i in range(6-id_len):
-                        zeros += '0'
-                    order_number = current_date + zeros + str(data.id)
-                else:
-                    order_number = current_date + str(data.id)
-                
-                data.number = order_number
-                data.save()
-            except:
-                None
+            # Generate order number
+            yr = int(datetime.date.today().strftime('%Y'))
+            dt = int(datetime.date.today().strftime('%d'))
+            mt = int(datetime.date.today().strftime('%m'))
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime('%Y%m%d') #20240611
+            
+            # Rellenar de ceros 5 espacios
+            # "42".zfill(5) >>> '00042'
+            # Cambiar
+            
+            id_len = len(str(data.id))
+            zeros = ''  # inicializar con 1 '0', para que agregue los ceros indicados
+            if id_len < 6:                
+                for i in range(6-id_len):
+                    zeros += '0'
+                order_number = current_date + zeros + str(data.id)
+            else:
+                order_number = current_date + str(data.id)
+            
+            data.number = order_number
+            data.save()
+        except:
+            print("error al crear orden")
 
-            # Orden generada (que esta en DB) enviar a template para PAGO
-            order = get_object_or_404(Order,user=current_user, number=order_number, is_ordered=False)
-            context = {
-                'order': order,
-                'cart_items': cart_items,
-                'total': total,
-                'ship_cost': ship_cost,
-                'tax': tax,
-                'g_total': g_total,
-                'ship_total': ship_total,
-            }
-            return render(request, 'order/payment.html', context)
-        else:
-            return HttpResponse('La forma no es válida')
+        # Orden generada (que esta en DB) enviar a template para PAGO
+        order = get_object_or_404(Order,user=current_user, number=order_number, is_ordered=False)
+        context = {
+            'order': order,
+            'cart_items': cart_items,
+            'total': total,
+            'ship_cost': ship_cost,
+            'tax': tax,
+            'g_total': g_total,
+            'ship_total': ship_total,
+        }
+        return render(request, 'order/payment.html', context)
+        #else:
+        #    return HttpResponse('La forma no es válida')
     else:
         return redirect('checkout')
+
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
