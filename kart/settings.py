@@ -32,7 +32,7 @@ SECRET_KEY = config('SECRET_KEY')  # Se cambio el texto explícito, por el dic d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)  # Se cambio el texto explícito, por el dic de 'decouple' en '.env'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ghetti-env.eba-xmmems2p.us-west-2.elasticbeanstalk.com']
 
 
 # Application definition
@@ -183,41 +183,6 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 # Cambiar el texto explicito por el dic de 'decouple'
 
 STATES_MX = config('STATES_MX').split(",")
-# change your .env file to: ALLOWED_CODES=AB01,AB02
-# then you could do: ALLOWED_CODES = os.environ.get('ALLOWED_POSTCODES').split(",")
+#OK change your .env file to: ALLOWED_CODES=AB01,AB02
+#OK then you could do: ALLOWED_CODES = os.environ.get('ALLOWED_POSTCODES').split(",")
 
-"""
-STATES_MX = [
-    'Aguascalientes',
-    'Baja California',
-    'Baja California Sur',
-    'Campeche',
-    'Chiapas',
-    'Chihuahua',
-    'Ciudad de México',
-    'Coahuila de Zaragoza',
-    'Colima',
-    'Durango',
-    'Estado de México',
-    'Guanajuato',
-    'Guerrero',
-    'Hidalgo',
-    'Jalisco',
-    'Michoacán de Ocampo',
-    'Morelos',
-    'Nayarit',
-    'Nuevo León',
-    'Oaxaca',
-    'Puebla',
-    'Querétaro',
-    'Quintana Roo',
-    'San Luis Potosí',
-    'Sinaloa',
-    'Sonora',
-    'Tabasco',
-    'Tamaulipas',
-    'Tlaxcala',
-    'Veracruz de Ignacio de la Llave',
-    'Yucatán',
-    'Zacatecas'
-    ]"""
