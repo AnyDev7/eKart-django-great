@@ -17,9 +17,9 @@ from django.http import JsonResponse
 def payment(request):
     if request.method == 'POST':
         body = json.loads(request.body)
-        print("Body: ", body)
+        
         order = get_object_or_404(Order, user=request.user, is_ordered=False, number=body['orderID'])
-        print("Orden: ", order)
+        
         try:
             # store transaction data
             payment = Payment(

@@ -110,7 +110,7 @@ def product_detail(request, category_slug, product_slug):
         try:
                 orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
                 userprofile = UserProfile.objects.get(user__id=request.user.id)
-                print(userprofile) # Borrar
+                
         except OrderProduct.DoesNotExist:
             orderproduct = False
     else:
