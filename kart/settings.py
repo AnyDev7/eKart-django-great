@@ -32,8 +32,7 @@ SECRET_KEY = config('SECRET_KEY')  # Se cambio el texto explícito, por el dic d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)  # Se cambio el texto explícito, por el dic de 'decouple' en '.env'
 
-#ALLOWED_HOSTS = ['ghetti-env.eba-xmmems2p.us-west-2.elasticbeanstalk.com', '127.0.0.1']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ghetti-mart-env.eba-w2yhw2nf.us-west-2.elasticbeanstalk.com', '127.0.0.1']
 
 
 # Application definition
